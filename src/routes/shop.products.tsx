@@ -78,7 +78,7 @@ function ShopCatalog() {
               <SlidersHorizontal className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <select
                 value={sort}
-                onChange={(e) => navigate({ search: (s) => ({ ...s, sort: e.target.value as typeof sort }) })}
+                onChange={(e) => navigate({ search: { ...search, sort: e.target.value as NonNullable<typeof sort> } })}
                 className="appearance-none rounded-full border border-input bg-card py-3 pl-11 pr-8 text-sm outline-none focus:border-honey-deep"
               >
                 <option value="featured">Featured</option>
@@ -93,7 +93,7 @@ function ShopCatalog() {
         {/* Category pills */}
         <div className="reveal mt-8 flex flex-wrap gap-2">
           <button
-            onClick={() => navigate({ search: (s) => ({ ...s, category: undefined }) })}
+            onClick={() => navigate({ search: { ...search, category: undefined } })}
             className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${!category ? "bg-charcoal text-cream" : "border border-border bg-card text-foreground/70 hover:text-charcoal"}`}
           >
             All
@@ -101,7 +101,7 @@ function ShopCatalog() {
           {SHOP_CATEGORIES.map((c) => (
             <button
               key={c}
-              onClick={() => navigate({ search: (s) => ({ ...s, category: c }) })}
+              onClick={() => navigate({ search: { ...search, category: c } })}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${category === c ? "bg-charcoal text-cream" : "border border-border bg-card text-foreground/70 hover:text-charcoal"}`}
             >
               {c}
