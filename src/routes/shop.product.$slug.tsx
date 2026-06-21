@@ -90,7 +90,7 @@ function ProductDetail() {
             <p className="mt-6 text-base leading-relaxed text-muted-foreground">{product.description}</p>
 
             <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-              {product.benefits.map((b) => (
+              {product.benefits.map((b: string) => (
                 <li key={b} className="flex items-center gap-2 text-sm text-charcoal">
                   <span className="grid h-5 w-5 place-items-center rounded-full bg-honey text-charcoal"><Check className="h-3 w-3" /></span>
                   {b}
