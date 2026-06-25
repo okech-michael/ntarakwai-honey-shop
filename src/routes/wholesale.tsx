@@ -11,7 +11,7 @@ export const Route = createFileRoute("/wholesale")({
     meta: [
       { title: "Wholesale Honey Supply — Retailers, Hotels & Distributors" },
       { name: "description", content: "Reliable bulk supply of premium honey and bee products for supermarkets, hotels, restaurants and distributors." },
-      { property: "og:title", content: "Honeyfield Wholesale" },
+      { property: "og:title", content: "Ntarakuwai Pure & Natural Honey Wholesale" },
       { property: "og:description", content: "Bulk premium honey supply across Kenya." },
       { property: "og:image", content: production },
     ],

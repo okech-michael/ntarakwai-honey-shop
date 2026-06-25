@@ -1,3 +1,4 @@
+import ntaraHoney from "@/assets/ntaraHoney.jpeg";
 import pPure from "@/assets/product-pure-honey.jpg";
 import pProcessed from "@/assets/product-processed.jpg";
 import pBeeswax from "@/assets/product-beeswax.jpg";
@@ -13,6 +14,15 @@ export type ShopCategory =
   | "Bee Pollen"
   | "Gift Packages";
 
+export interface ShopReview {
+  id: string;
+  name: string;
+  title: string;
+  comment: string;
+  rating: number;
+  createdAt: string;
+}
+
 export interface ShopProduct {
   id: string;
   slug: string;
@@ -27,9 +37,25 @@ export interface ShopProduct {
   shortDesc: string;
   description: string;
   benefits: string[];
+  reviews?: ShopReview[];
 }
 
 export const SHOP_PRODUCTS: ShopProduct[] = [
+  {
+    id: "ntara-honey",
+    slug: "ntara-honey",
+    name: "Ntara Honey",
+    category: "Raw Honey",
+    image: ntaraHoney,
+    weight: "500g",
+    price: 950,
+    stock: 20,
+    badge: "New",
+    shortDesc: "A rich, locally sourced honey featured in our new Ntara collection.",
+    description:
+      "Our signature Ntara Honey brings a premium, handcrafted feel to the shop with the same natural quality and rich flavor that customers love.",
+    benefits: ["Locally inspired", "Premium quality", "Great for gifting"],
+  },
   {
     id: "raw-500",
     slug: "pure-raw-honey-500g",

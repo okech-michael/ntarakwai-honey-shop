@@ -9,8 +9,8 @@ import hero from "@/assets/hero-honey.jpg";
 export const Route = createFileRoute("/shop/")({
   head: () => ({
     meta: [
-      { title: "Shop Premium Natural Honey Online — Honeyfield" },
-      { name: "description", content: "Order pure honey, beeswax, propolis, bee pollen and honey gift packs online. Delivery anywhere in Kenya via Wells Fargo Courier." },
+      { title: "Shop Premium Natural Honey Online — Ntarakuwai Pure & Natural Honey" },
+      { name: "description", content: "Order pure honey, beeswax, propolis, bee pollen and honey gift packs online. Delivery anywhere in Kenya via Via Wells Fargo or Nationwide delivery via your preferred parcel courier." },
       { property: "og:title", content: "Shop Premium Natural Honey Online" },
       { property: "og:description", content: "Pure honey harvested naturally and delivered directly to your doorstep anywhere in Kenya." },
       { property: "og:image", content: hero },
@@ -44,7 +44,7 @@ function ShopHome() {
           {[
             { icon: Leaf, t: "100% Natural", s: "No additives, ever" },
             { icon: ShieldCheck, t: "Secure Checkout", s: "M-Pesa & Bank pay" },
-            { icon: Truck, t: "Nationwide Delivery", s: "Wells Fargo Courier" },
+            { icon: Truck, t: "Nationwide Delivery", s: "Via Wells Fargo or your preferred parcel courier" },
             { icon: Star, t: "Loved in Kenya", s: "5-star reviews" },
           ].map((f) => (
             <div key={f.t} className="flex items-center gap-3">
@@ -135,7 +135,7 @@ function ShopHome() {
           <div className="flex items-center gap-5">
             <span className="grid h-14 w-14 place-items-center rounded-2xl bg-honey text-charcoal"><Truck className="h-6 w-6" /></span>
             <div>
-              <h3 className="font-display text-2xl md:text-3xl">Nationwide delivery via Wells Fargo Courier</h3>
+              <h3 className="font-display text-2xl md:text-3xl">Nationwide delivery via Via Wells Fargo or your preferred parcel courier</h3>
               <p className="mt-1 text-sm text-cream/70">Order today, dispatched within 24 hours. Delivery to all 47 counties.</p>
             </div>
           </div>

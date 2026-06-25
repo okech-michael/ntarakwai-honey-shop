@@ -30,7 +30,7 @@ export const Route = createFileRoute("/gallery")({
     meta: [
       { title: "Gallery — From hive to home" },
       { name: "description", content: "A visual journey through our beehives, harvesting process, production and packaging." },
-      { property: "og:title", content: "Honeyfield Gallery" },
+      { property: "og:title", content: "Ntarakuwai Pure & Natural Honey Gallery" },
       { property: "og:description", content: "From hive to home — explore our craft." },
       { property: "og:image", content: hives },
     ],

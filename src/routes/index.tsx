@@ -13,9 +13,9 @@ import pPollen from "@/assets/product-pollen.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Honeyfield — Pure Natural Honey From Trusted Beekeepers" },
+      { title: "Ntarakuwai Pure & Natural Honey — Pure Natural Honey From Trusted Beekeepers" },
       { name: "description", content: "Premium honey, beeswax, propolis and bee pollen harvested naturally in Kenya. Wholesale & retail supply with quality assurance." },
-      { property: "og:title", content: "Honeyfield — Pure Natural Honey" },
+      { property: "og:title", content: "Ntarakuwai Pure & Natural Honey — Pure Natural Honey" },
       { property: "og:description", content: "Premium honey and bee products from trusted Kenyan beekeepers." },
       { property: "og:image", content: hero },
       { name: "twitter:image", content: hero },

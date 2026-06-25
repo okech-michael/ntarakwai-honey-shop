@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { ShoppingBag, Search, SlidersHorizontal } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
-import { SHOP_PRODUCTS, SHOP_CATEGORIES, formatKES, type ShopCategory } from "@/lib/products";
+import { SHOP_PRODUCTS, SHOP_CATEGORIES, formatKES, type ShopCategory, type ShopProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 
 const searchSchema = z.object({
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/shop/products")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "All Products — Honeyfield Shop" },
+      { title: "All Products — Ntarakuwai Pure & Natural Honey Shop" },
       { name: "description", content: "Browse every honey and bee product available for online order: raw honey, organic, beeswax, propolis, pollen and gift sets." },
       { property: "og:title", content: "Shop All Honey Products" },
       { property: "og:description", content: "Pure honey and bee products available for nationwide delivery in Kenya." },
@@ -31,12 +31,28 @@ function ShopCatalog() {
   const navigate = Route.useNavigate();
   const { add } = useCart();
   const [q, setQ] = useState(search.q ?? "");
+  const [catalog, setCatalog] = useState<ShopProduct[]>(SHOP_PRODUCTS);
+
+  useEffect(() => {
+    let isActive = true;
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isActive || !data?.products) return;
+        setCatalog(data.products as ShopProduct[]);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const category = (search.category as ShopCategory | undefined) ?? undefined;
   const sort = search.sort ?? "featured";
 
   const list = useMemo(() => {
-    let out = SHOP_PRODUCTS.slice();
+    let out = catalog.slice();
     if (category) out = out.filter((p) => p.category === category);
     if (q.trim()) {
       const term = q.toLowerCase();
@@ -48,7 +64,7 @@ function ShopCatalog() {
       case "name": out.sort((a, b) => a.name.localeCompare(b.name)); break;
     }
     return out;
-  }, [category, q, sort]);
+  }, [catalog, category, q, sort]);
 
   return (
     <div className="bg-background pt-28 pb-20">

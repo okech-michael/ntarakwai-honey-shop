@@ -7,7 +7,7 @@ import { formatKES } from "@/lib/products";
 export const Route = createFileRoute("/shop/cart")({
   head: () => ({
     meta: [
-      { title: "Your Cart — Honeyfield Shop" },
+      { title: "Your Cart — Ntarakuwai Pure & Natural Honey Shop" },
       { name: "description", content: "Review your honey order before checkout." },
     ],
   }),
@@ -106,7 +106,7 @@ function CartPage() {
 
             <div className="mt-5 flex items-center gap-2 rounded-2xl bg-secondary/70 p-3 text-xs text-muted-foreground">
               <Truck className="h-4 w-4 text-honey-deep" />
-              <span>Delivery via Wells Fargo Courier — final cost calculated at checkout based on your county.</span>
+              <span>Delivery via Via Wells Fargo or your preferred parcel courier — final cost calculated at checkout based on your county.</span>
             </div>
           </aside>
         </div>

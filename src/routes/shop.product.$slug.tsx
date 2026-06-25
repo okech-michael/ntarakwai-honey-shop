@@ -1,8 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
-import { ShoppingBag, Minus, Plus, Check, Truck, ShieldCheck, ArrowLeft, Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ShoppingBag, Minus, Plus, Check, Truck, ShieldCheck, ArrowLeft, Star, Send } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
-import { findProduct, SHOP_PRODUCTS, formatKES } from "@/lib/products";
+import { findProduct, SHOP_PRODUCTS, formatKES, type ShopProduct } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/shop/product/$slug")({
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/shop/product/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.product.name} — Honeyfield Shop` },
+          { title: `${loaderData.product.name} — Ntarakuwai Pure & Natural Honey Shop` },
           { name: "description", content: loaderData.product.shortDesc },
           { property: "og:title", content: loaderData.product.name },
           { property: "og:description", content: loaderData.product.shortDesc },
@@ -35,15 +35,77 @@ function ProductDetail() {
   useReveal();
   const { product } = Route.useLoaderData();
   const { add } = useCart();
+  const [activeProduct, setActiveProduct] = useState<ShopProduct>(product);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [reviewName, setReviewName] = useState("");
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewError, setReviewError] = useState("");
+  const [reviewSuccess, setReviewSuccess] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
-  const related = SHOP_PRODUCTS.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
+  useEffect(() => {
+    let isActive = true;
+    fetch(`/api/products/${product.slug}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isActive || !data?.product) return;
+        setActiveProduct(data.product as ShopProduct);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      isActive = false;
+    };
+  }, [product.slug]);
+
+  const reviews = activeProduct.reviews ?? [];
+  const reviewCount = reviews.length;
+  const averageRating = useMemo(() => {
+    if (!reviewCount) return 5;
+    return Number((reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount).toFixed(1));
+  }, [reviews, reviewCount]);
+  const related = SHOP_PRODUCTS.filter((p) => p.id !== activeProduct.id && p.category === activeProduct.category).slice(0, 4);
 
   function handleAdd() {
-    add(product.id, qty);
+    add(activeProduct.id, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  }
+
+  async function handleReviewSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setSubmittingReview(true);
+    setReviewError("");
+    setReviewSuccess("");
+
+    const response = await fetch(`/api/products/${activeProduct.slug}/reviews`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: reviewName,
+        title: reviewTitle,
+        comment: reviewComment,
+        rating: reviewRating,
+      }),
+    });
+
+    const data = await response.json();
+    setSubmittingReview(false);
+
+    if (!response.ok || !data?.product) {
+      setReviewError(data?.error ?? "We could not save your review right now.");
+      return;
+    }
+
+    setActiveProduct(data.product as ShopProduct);
+    setReviewName("");
+    setReviewTitle("");
+    setReviewComment("");
+    setReviewRating(5);
+    setReviewSuccess("Thanks for sharing your feedback.");
   }
 
   return (
@@ -77,20 +139,20 @@ function ProductDetail() {
             <h1 className="font-display mt-3 text-4xl text-charcoal md:text-5xl">{product.name}</h1>
 
             <div className="mt-3 flex items-center gap-2 text-honey">
-              {Array.from({ length: 5 }).map((_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}
-              <span className="text-xs text-muted-foreground">(124 reviews)</span>
+              {Array.from({ length: 5 }).map((_, k) => <Star key={k} className={`h-4 w-4 ${k < Math.round(averageRating) ? "fill-current" : "opacity-40"}`} />)}
+              <span className="text-xs text-muted-foreground">({reviewCount} {reviewCount === 1 ? "review" : "reviews"})</span>
             </div>
 
             <div className="mt-6 flex items-baseline gap-3">
-              <span className="font-display text-4xl text-honey-deep">{formatKES(product.price)}</span>
-              {product.oldPrice && <span className="text-lg text-muted-foreground line-through">{formatKES(product.oldPrice)}</span>}
-              <span className="text-xs text-muted-foreground">/ {product.weight}</span>
+              <span className="font-display text-4xl text-honey-deep">{formatKES(activeProduct.price)}</span>
+              {activeProduct.oldPrice && <span className="text-lg text-muted-foreground line-through">{formatKES(activeProduct.oldPrice)}</span>}
+              <span className="text-xs text-muted-foreground">/ {activeProduct.weight}</span>
             </div>
 
-            <p className="mt-6 text-base leading-relaxed text-muted-foreground">{product.description}</p>
+            <p className="mt-6 text-base leading-relaxed text-muted-foreground">{activeProduct.description}</p>
 
             <ul className="mt-6 grid gap-2 sm:grid-cols-2">
-              {product.benefits.map((b: string) => (
+              {activeProduct.benefits.map((b: string) => (
                 <li key={b} className="flex items-center gap-2 text-sm text-charcoal">
                   <span className="grid h-5 w-5 place-items-center rounded-full bg-honey text-charcoal"><Check className="h-3 w-3" /></span>
                   {b}
@@ -103,24 +165,64 @@ function ProductDetail() {
               <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1">
                 <button onClick={() => setQty((q) => Math.max(1, q - 1))} aria-label="Decrease" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary"><Minus className="h-4 w-4" /></button>
                 <span className="w-10 text-center font-semibold">{qty}</span>
-                <button onClick={() => setQty((q) => Math.min(product.stock, q + 1))} aria-label="Increase" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary"><Plus className="h-4 w-4" /></button>
+                <button onClick={() => setQty((q) => Math.min(activeProduct.stock, q + 1))} aria-label="Increase" className="grid h-10 w-10 place-items-center rounded-full hover:bg-secondary"><Plus className="h-4 w-4" /></button>
               </div>
-              <button onClick={handleAdd} className="btn-honey flex-1 sm:flex-none">
+              <button onClick={handleAdd} disabled={activeProduct.stock <= 0} className="btn-honey flex-1 sm:flex-none disabled:cursor-not-allowed disabled:opacity-60">
                 {added ? <><Check className="h-4 w-4" /> Added to cart</> : <><ShoppingBag className="h-4 w-4" /> Add to cart</>}
               </button>
-              <Link to="/shop/cart" className="btn-outline-honey flex-1 sm:flex-none" onClick={() => add(product.id, qty)}>
+              <Link to="/shop/cart" className="btn-outline-honey flex-1 sm:flex-none" onClick={() => add(activeProduct.id, qty)}>
                 Buy Now
               </Link>
             </div>
 
             <div className="mt-3 text-xs text-muted-foreground">
-              {product.stock > 20 ? <span className="text-honey-deep font-medium">✓ In stock</span> : <span className="text-destructive font-medium">Only {product.stock} left</span>}
+              {activeProduct.stock > 20 ? <span className="text-honey-deep font-medium">✓ In stock</span> : activeProduct.stock > 0 ? <span className="text-destructive font-medium">Only {activeProduct.stock} left</span> : <span className="text-destructive font-medium">Out of stock</span>}
             </div>
 
             <div className="mt-8 grid gap-3 rounded-3xl border border-border bg-card p-5 text-sm">
-              <div className="flex items-center gap-3"><Truck className="h-5 w-5 text-honey-deep" /><span>Delivery via <strong>Wells Fargo Courier</strong> — 1–3 business days</span></div>
+              <div className="flex items-center gap-3"><Truck className="h-5 w-5 text-honey-deep" /><span>Delivery via <strong>Via Wells Fargo or your preferred parcel courier</strong> — 1–3 business days</span></div>
               <div className="flex items-center gap-3"><ShieldCheck className="h-5 w-5 text-honey-deep" /><span>Lab-tested, traceable & 100% pure</span></div>
             </div>
+          </div>
+        </div>
+
+        <div className="mt-16 rounded-[2rem] border border-border bg-card p-7 shadow-sm md:p-9">
+          <h2 className="font-display text-3xl text-charcoal">Customer reviews</h2>
+          <p className="mt-2 text-sm text-muted-foreground">Share what you loved about this product.</p>
+
+          <form onSubmit={handleReviewSubmit} className="mt-7 grid gap-4 md:grid-cols-2">
+            <input value={reviewName} onChange={(e) => setReviewName(e.target.value)} required placeholder="Your name" className="rounded-full border border-input bg-background px-4 py-3 text-sm" />
+            <input value={reviewTitle} onChange={(e) => setReviewTitle(e.target.value)} required placeholder="Short title" className="rounded-full border border-input bg-background px-4 py-3 text-sm" />
+            <textarea value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} required rows={4} placeholder="Tell us about your experience" className="md:col-span-2 rounded-2xl border border-input bg-background px-4 py-3 text-sm" />
+            <div className="flex items-center gap-3 md:col-span-2">
+              <span className="text-sm text-muted-foreground">Rating</span>
+              <select value={reviewRating} onChange={(e) => setReviewRating(Number(e.target.value))} className="rounded-full border border-input bg-background px-3 py-2 text-sm">
+                {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} stars</option>)}
+              </select>
+              <button type="submit" disabled={submittingReview} className="ml-auto inline-flex items-center gap-2 rounded-full bg-charcoal px-4 py-2 text-sm font-semibold text-cream">
+                {submittingReview ? "Saving..." : <><Send className="h-4 w-4" /> Submit review</>}
+              </button>
+            </div>
+            {reviewError && <p className="md:col-span-2 text-sm text-destructive">{reviewError}</p>}
+            {reviewSuccess && <p className="md:col-span-2 text-sm text-honey-deep">{reviewSuccess}</p>}
+          </form>
+
+          <div className="mt-8 space-y-4">
+            {reviews.length === 0 && <p className="text-sm text-muted-foreground">No reviews yet. Be the first to share yours.</p>}
+            {reviews.map((review) => (
+              <div key={review.id} className="rounded-2xl border border-border bg-background p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-semibold text-charcoal">{review.title}</div>
+                    <div className="text-sm text-muted-foreground">{review.name}</div>
+                  </div>
+                  <div className="flex items-center gap-1 text-honey">
+                    {Array.from({ length: 5 }).map((_, index) => <Star key={index} className={`h-4 w-4 ${index < review.rating ? "fill-current" : "opacity-40"}`} />)}
+                  </div>
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground">{review.comment}</p>
+              </div>
+            ))}
           </div>
         </div>
 

@@ -8,9 +8,9 @@ import honeycomb from "@/assets/honeycomb.jpg";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Honeyfield — Beekeeping with purpose" },
+      { title: "About Ntarakuwai Pure & Natural Honey — Beekeeping with purpose" },
       { name: "description", content: "Our story, mission, beekeeping process and commitment to ethical, sustainable honey production in Kenya." },
-      { property: "og:title", content: "About Honeyfield" },
+      { property: "og:title", content: "About Ntarakuwai Pure & Natural Honey" },
       { property: "og:description", content: "Beekeeping with purpose — pure honey, ethical practice." },
       { property: "og:image", content: beekeeper },
     ],

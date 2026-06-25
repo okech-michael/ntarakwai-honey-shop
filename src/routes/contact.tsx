@@ -8,9 +8,9 @@ import honeycomb from "@/assets/honeycomb.jpg";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Honeyfield" },
-      { name: "description", content: "Get in touch with Honeyfield for orders, wholesale enquiries and partnerships. Call +254 711 856 795." },
-      { property: "og:title", content: "Contact Honeyfield" },
+      { title: "Contact Ntarakuwai Pure & Natural Honey" },
+      { name: "description", content: "Get in touch with Ntarakuwai Pure & Natural Honey for orders, wholesale enquiries and partnerships. Call 0711856795." },
+      { property: "og:title", content: "Contact Ntarakuwai Pure & Natural Honey" },
       { property: "og:description", content: "We'd love to hear from you." },
       { property: "og:image", content: honeycomb },
     ],
@@ -41,8 +41,8 @@ function Contact() {
           <div className="reveal space-y-5">
             {[
               { icon: Phone, t: "Phone", v: "+254 711 856 795", href: "tel:+254711856795" },
-              { icon: Mail, t: "Email", v: "hello@honeyfield.co.ke", href: "mailto:hello@honeyfield.co.ke" },
-              { icon: MapPin, t: "Address", v: "Nairobi, Kenya" },
+              { icon: Mail, t: "Email", v: "ntarakwai2023@gmail.com", href: "mailto:ntarakwai2023@gmail.com" },
+              { icon: MapPin, t: "Address", v: "Mt. Kulal, Kenya" },
               { icon: Clock, t: "Business Hours", v: "Mon – Sat · 8:00 – 18:00 EAT" },
             ].map((c) => (
               <a key={c.t} href={c.href} className="flex items-start gap-4 rounded-3xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5">
@@ -56,8 +56,8 @@ function Contact() {
 
             <div className="overflow-hidden rounded-3xl border border-border bg-card">
               <iframe
-                title="Honeyfield location"
-                src="https://www.google.com/maps?q=Nairobi,Kenya&output=embed"
+                title="Ntarakwai Pure & Natural Honey location"
+                src="https://www.google.com/maps?q=Mt.%20Kulal,Kenya&output=embed"
                 className="h-64 w-full"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

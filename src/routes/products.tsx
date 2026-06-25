@@ -28,8 +28,8 @@ export const Route = createFileRoute("/products")({
   head: () => ({
     meta: [
       { title: "Products — Honey, Beeswax, Propolis & Pollen" },
-      { name: "description", content: "Browse Honeyfield's premium catalogue: pure honey, processed honey, beeswax, propolis, bee pollen and gift packs." },
-      { property: "og:title", content: "Honeyfield Products" },
+      { name: "description", content: "Browse Ntarakuwai Pure & Natural Honey's premium catalogue: pure honey, processed honey, beeswax, propolis, bee pollen and gift packs." },
+      { property: "og:title", content: "Ntarakuwai Pure & Natural Honey Products" },
       { property: "og:description", content: "Premium honey and bee product catalogue." },
       { property: "og:image", content: pPure },
     ],

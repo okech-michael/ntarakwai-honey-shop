@@ -1,0 +1,78 @@
+{
+  "products": {
+    "raw-500": {
+      "stock": 41,
+      "reviews": [
+        {
+          "id": "review-1782397649362",
+          "name": "Ada",
+          "title": "Lovely",
+          "comment": "Excellent",
+          "rating": 5,
+          "createdAt": "2026-06-25T14:27:29.362Z"
+        }
+      ]
+    },
+    "raw-1kg": {
+      "stock": 28,
+      "reviews": []
+    },
+    "organic-500": {
+      "stock": 18,
+      "reviews": []
+    },
+    "processed-500": {
+      "stock": 65,
+      "reviews": []
+    },
+    "beeswax-250": {
+      "stock": 34,
+      "reviews": []
+    },
+    "propolis-30": {
+      "stock": 22,
+      "reviews": []
+    },
+    "pollen-200": {
+      "stock": 15,
+      "reviews": []
+    },
+    "gift-trio": {
+      "stock": 12,
+      "reviews": []
+    },
+    "gift-luxe": {
+      "stock": 8,
+      "reviews": []
+    }
+  },
+  "orders": [
+    {
+      "id": "HF97686105",
+      "items": [
+        {
+          "productId": "raw-500",
+          "qty": 1,
+          "unitPrice": 850,
+          "lineTotal": 850
+        }
+      ],
+      "customer": {
+        "landmark": "Mall",
+        "fullName": "Ada",
+        "address": "1 Main Road",
+        "phone": "0712345678",
+        "county": "Nairobi",
+        "email": "ada@example.com",
+        "town": "Westlands"
+      },
+      "paymentMethod": "mpesa",
+      "amount": 850,
+      "paymentStatus": "paid",
+      "createdAt": "2026-06-25T14:28:06.105Z",
+      "checkoutRequestID": "local-1782397686106",
+      "merchantRequestID": "local-1782397686107",
+      "paidAt": "2026-06-25T14:28:46.513Z"
+    }
+  ]
+}

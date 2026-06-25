@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { Check, ShoppingBag, Phone, Truck, Mail } from "lucide-react";
 
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/shop/checkout/success")({
   validateSearch: search,
   head: () => ({
     meta: [
-      { title: "Order Confirmed — Honeyfield Shop" },
+      { title: "Order Confirmed — Ntarakuwai Pure & Natural Honey Shop" },
       { name: "description", content: "Your honey order has been received." },
       { name: "robots", content: "noindex" },
     ],
@@ -22,6 +23,29 @@ export const Route = createFileRoute("/shop/checkout/success")({
 function Success() {
   const { order, method } = Route.useSearch();
   const isMpesa = method === "mpesa";
+  const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid" | "failed">("pending");
+
+  useEffect(() => {
+    if (!order || !isMpesa) return;
+
+    let isActive = true;
+    const refresh = async () => {
+      const response = await fetch(`/api/orders/${order}`);
+      if (!isActive) return;
+      if (response.ok) {
+        const data = await response.json();
+        const nextStatus = data?.order?.paymentStatus ?? "pending";
+        setPaymentStatus(nextStatus === "paid" ? "paid" : nextStatus === "failed" ? "failed" : "pending");
+      }
+    };
+
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 4000);
+    return () => {
+      isActive = false;
+      window.clearInterval(interval);
+    };
+  }, [isMpesa, order]);
 
   return (
     <div className="bg-background pt-32 pb-20">
@@ -32,11 +56,13 @@ function Success() {
               <Check className="h-9 w-9" strokeWidth={3} />
             </div>
             <h1 className="font-display mt-7 text-4xl text-charcoal md:text-5xl">
-              {isMpesa ? "Payment received!" : "Order received!"}
+              {isMpesa && paymentStatus === "paid" ? "Payment received!" : isMpesa ? "Payment pending" : "Order received!"}
             </h1>
             <p className="mt-4 text-base text-muted-foreground">
               {isMpesa
-                ? "Your M-Pesa payment has been confirmed. We're preparing your order for dispatch."
+                ? paymentStatus === "paid"
+                  ? "Your M-Pesa payment has been confirmed. We're preparing your order for dispatch."
+                  : "Your M-Pesa payment is being confirmed automatically. Please keep your phone nearby while the prompt completes."
                 : "Your bank payment is now pending verification. We'll confirm within 24 hours."}
             </p>
 
@@ -49,7 +75,7 @@ function Success() {
 
             <div className="mt-10 grid gap-4 text-left sm:grid-cols-3">
               <Card icon={<Mail className="h-5 w-5" />} t="Confirmation sent" s="Check your inbox for the order receipt." />
-              <Card icon={<Truck className="h-5 w-5" />} t="Wells Fargo Courier" s="Tracking number will follow shortly." />
+              <Card icon={<Truck className="h-5 w-5" />} t="Via Wells Fargo or your preferred parcel courier" s="Tracking number will follow shortly." />
               <Card icon={<Phone className="h-5 w-5" />} t="Need help?" s="Call +254 711 856 795" />
             </div>
 

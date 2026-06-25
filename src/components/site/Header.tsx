@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import logo from "@/assets/logo.jpeg";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -35,11 +36,13 @@ export function Header() {
     >
       <div className="container-luxe grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:grid-cols-[auto_1fr_auto]">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-honey to-honey-deep text-charcoal shadow-md">
-            <HexIcon />
-          </span>
+          <img
+            src={logo}
+            alt="Ntarakwai Pure & Natural Honey logo"
+            className="h-10 w-10 shrink-0 rounded-full object-cover shadow-md"
+          />
           <span className="font-display truncate text-xl font-semibold tracking-tight text-charcoal">
-            Honeyfield
+            Ntarakwai Pure & Natural Honey
             <span className="text-honey-deep">.</span>
           </span>
         </Link>

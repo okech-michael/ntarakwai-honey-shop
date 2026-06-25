@@ -8,7 +8,7 @@ import { formatKES } from "@/lib/products";
 export const Route = createFileRoute("/shop/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Honeyfield Shop" },
+      { title: "Checkout — Ntarakuwai Pure & Natural Honey Shop" },
       { name: "description", content: "Securely complete your honey order with M-Pesa or bank transfer." },
     ],
   }),
@@ -44,6 +44,7 @@ function Checkout() {
   const [bankFile, setBankFile] = useState<File | null>(null);
   const [bankNotes, setBankNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const delivery = useMemo(() => {
     if (subtotal === 0) return 0;
@@ -72,13 +73,40 @@ function Checkout() {
 
   async function handlePay() {
     setSubmitting(true);
-    // Mock processing
-    await new Promise((r) => setTimeout(r, 1800));
-    const orderNumber = `HF${Date.now().toString().slice(-8)}`;
+    setError("");
+
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: resolved.map(({ product, qty }) => ({ productId: product.id, qty })),
+        customer: {
+          fullName: info.fullName,
+          phone: info.phone,
+          email: info.email,
+          county: info.county,
+          town: info.town,
+          landmark: info.landmark,
+          address: info.address,
+        },
+        paymentMethod: payMethod,
+        phone: payMethod === "mpesa" ? mpesaPhone : undefined,
+        amount: total,
+      }),
+    });
+
+    const data = await response.json();
+    setSubmitting(false);
+
+    if (!response.ok || !data?.ok) {
+      setError(data?.error ?? "We could not process this order right now.");
+      return;
+    }
+
     clear();
     navigate({
       to: "/shop/checkout/success",
-      search: { order: orderNumber, method: payMethod },
+      search: { order: data.orderNumber, method: payMethod },
     });
   }
 
@@ -238,7 +266,7 @@ function Checkout() {
                       <div className="text-xs font-semibold uppercase tracking-widest text-honey-deep">Bank Details</div>
                       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                         <div><dt className="text-muted-foreground">Bank Name</dt><dd className="font-medium text-charcoal">Equity Bank Kenya</dd></div>
-                        <div><dt className="text-muted-foreground">Account Name</dt><dd className="font-medium text-charcoal">Honeyfield Limited</dd></div>
+                        <div><dt className="text-muted-foreground">Account Name</dt><dd className="font-medium text-charcoal">Ntarakuwai Pure & Natural Honey</dd></div>
                         <div><dt className="text-muted-foreground">Account Number</dt><dd className="font-medium text-charcoal">0100200300400</dd></div>
                         <div><dt className="text-muted-foreground">Branch</dt><dd className="font-medium text-charcoal">Westlands</dd></div>
                         <div><dt className="text-muted-foreground">Swift Code</dt><dd className="font-medium text-charcoal">EQBLKENA</dd></div>
@@ -281,6 +309,8 @@ function Checkout() {
                   </button>
                 </div>
 
+                {error && <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+
                 <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
                   <ShieldCheck className="h-4 w-4 text-honey-deep" /> Your payment is processed securely. We never store card details.
                 </div>
@@ -313,7 +343,7 @@ function Checkout() {
             </div>
             <div className="mt-5 flex items-center gap-2 rounded-xl bg-secondary/70 p-3 text-xs text-muted-foreground">
               <Truck className="h-4 w-4 text-honey-deep" />
-              <span>Delivery via Wells Fargo Courier — 1–3 business days.</span>
+              <span>Delivery via Via Wells Fargo or your preferred parcel courier — 1–3 business days.</span>
             </div>
           </aside>
         </div>
