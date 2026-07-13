@@ -36,11 +36,13 @@ export function Header() {
     >
       <div className="container-luxe grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:grid-cols-[auto_1fr_auto]">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
-          <img
-            src={logo}
-            alt="Ntarakwai Pure & Natural Honey logo"
-            className="h-10 w-10 shrink-0 rounded-full object-cover shadow-md"
-          />
+          <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full shadow-none">
+            <img
+              src={logo}
+              alt="Ntarakwai Pure & Natural Honey logo"
+              className="h-full w-full rounded-full object-cover"
+            />
+          </span>
           <span className="font-display truncate text-xl font-semibold tracking-tight text-charcoal">
             Ntarakwai Pure & Natural Honey
             <span className="text-honey-deep">.</span>
