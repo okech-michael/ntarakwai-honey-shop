@@ -8,13 +8,13 @@ export function Footer() {
       <div className="container-luxe grid gap-12 py-16 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full shadow-none">
-            <img
-              src={logo}
-              alt="Ntarakwai Pure & Natural Honey logo"
-              className="h-full w-full rounded-full object-cover"
-            />
-          </span>
+            <span className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-cream/15 bg-cream/90 p-0.5 shadow-none sm:h-11 sm:w-11">
+              <img
+                src={logo}
+                alt="Ntarakwai Pure & Natural Honey logo"
+                className="h-full w-full rounded-full object-contain"
+              />
+            </span>
             <span className="font-display text-2xl">Ntarakwai Pure & Natural Honey<span className="text-honey">.</span></span>
           </div>
           <p className="mt-4 text-sm text-cream/70 leading-relaxed">
