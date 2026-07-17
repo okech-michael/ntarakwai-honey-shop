@@ -56,7 +56,8 @@ export default async function handler(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const pathname = url.pathname;
 
-  if (pathname.startsWith("/assets/")) {
+  const isStaticAssetRequest = pathname.includes(".") || pathname.startsWith("/assets/");
+  if (isStaticAssetRequest) {
     const served = await serveStaticFile(pathname, response);
     if (served) return;
   }
