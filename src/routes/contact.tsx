@@ -56,7 +56,7 @@ function Contact() {
 
             <div className="overflow-hidden rounded-3xl border border-border bg-card">
               <iframe
-                title="Ntarakwai Pure & Natural Honey location"
+                title="Ntarakwai Beekeeping Limited location"
                 src="https://www.google.com/maps?q=Mt.%20Kulal,Kenya&output=embed"
                 className="h-64 w-full"
                 loading="lazy"

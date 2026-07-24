@@ -39,12 +39,12 @@ export function Header() {
           <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-border/60 bg-cream/95 p-1 shadow-sm sm:h-14 sm:w-14">
             <img
               src={logo}
-              alt="Ntarakwai Pure & Natural Honey logo"
+              alt="Ntarakwai Beekeeping Limited logo"
               className="h-full w-full rounded-full object-contain"
             />
           </span>
           <span className="font-display truncate text-xl font-semibold tracking-tight text-charcoal">
-            Ntarakwai Pure & Natural Honey
+            Ntarakwai Beekeeping Limited
             <span className="text-honey-deep">.</span>
           </span>
         </Link>
