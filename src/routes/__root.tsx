@@ -1,28 +1,33 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
-  createRootRouteWithContext,
-  useRouter,
-  HeadContent,
-  Scripts,
-} from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
-
-import "../styles.css";
-import { Header } from "../components/site/Header";
-import { Footer } from "../components/site/Footer";
-import { MobileCallButton } from "../components/site/MobileCallButton";
-import { CartProvider } from "../lib/cart";
-
-function NotFoundComponent() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "Ntarakwai Pure & Natural Honey — Premium Honey & Bee Products" },
+      { name: "description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
+      { name: "author", content: "Ntarakwai Pure & Natural Honey" },
+      { property: "og:title", content: "Ntarakwai Pure & Natural Honey — Premium Honey & Bee Products" },
+      { property: "og:description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Ntarakwai Pure & Natural Honey — Premium Honey & Bee Products" },
+      { name: "twitter:description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
+      { property: "og:image", content: "/logo.jpeg" },
+      { name: "twitter:image", content: "/logo.jpeg" },
+      { name: "application-name", content: "Ntarakwai Pure & Natural Honey" },
+      { name: "apple-mobile-web-app-title", content: "Ntarakwai Pure & Natural Honey" },
+      { name: "theme-color", content: "#F6E7C2" },
+    ],
+    links: [
+      { rel: "icon", href: "/logo.jpeg", type: "image/jpeg" },
+      { rel: "shortcut icon", href: "/logo.jpeg", type: "image/jpeg" },
+      { rel: "apple-touch-icon", href: "/logo.jpeg" },
+      { rel: "mask-icon", href: "/logo.jpeg" },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+    ],
         </p>
         <div className="mt-6">
           <Link
@@ -77,22 +82,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ntarakwai Beekeeping Limited — Premium Honey & Bee Products" },
+      { title: "Ntarakwai Pure & Natural Honey — Premium Honey & Bee Products" },
       { name: "description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
-      { name: "author", content: "Ntarakwai Beekeeping Limited" },
-      { property: "og:title", content: "Ntarakwai Beekeeping Limited — Premium Honey & Bee Products" },
+      { name: "author", content: "Ntarakwai Pure & Natural Honey" },
+      { property: "og:title", content: "Ntarakwai Pure & Natural Honey — Premium Honey & Bee Products" },
       { property: "og:description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Ntarakwai Beekeeping Limited — Premium Honey & Bee Products" },
+      { name: "twitter:title", content: "Ntarakwai Pure & Natural Honey — Premium Honey & Bee Products" },
       { name: "twitter:description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
       { property: "og:image", content: "/logo.jpeg" },
       { name: "twitter:image", content: "/logo.jpeg" },
+      { name: "application-name", content: "Ntarakwai Pure & Natural Honey" },
+      { name: "apple-mobile-web-app-title", content: "Ntarakwai Pure & Natural Honey" },
+      { name: "theme-color", content: "#F6E7C2" },
     ],
     links: [
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "shortcut icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/logo.jpeg", type: "image/jpeg" },
+      { rel: "shortcut icon", href: "/logo.jpeg", type: "image/jpeg" },
       { rel: "apple-touch-icon", href: "/logo.jpeg" },
+      { rel: "mask-icon", href: "/logo.jpeg" },
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {

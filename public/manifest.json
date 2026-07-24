@@ -1,0 +1,20 @@
+{
+  "name": "Ntarakwai Pure & Natural Honey",
+  "short_name": "Ntarakwai Honey",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#F6E7C2",
+  "icons": [
+    {
+      "src": "/logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

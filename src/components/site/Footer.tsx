@@ -11,11 +11,11 @@ export function Footer() {
             <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-cream/20 bg-cream/95 p-1 shadow-sm sm:h-14 sm:w-14">
               <img
                 src={logo}
-                alt="Ntarakwai Beekeeping Limited logo"
+                alt="Ntarakwai Pure & Natural Honey logo"
                 className="h-full w-full rounded-full object-contain"
               />
             </span>
-            <span className="font-display text-2xl">Ntarakwai Beekeeping Limited<span className="text-honey">.</span></span>
+            <span className="font-display text-2xl">Ntarakwai Pure & Natural Honey<span className="text-honey">.</span></span>
           </div>
           <p className="mt-4 text-sm text-cream/70 leading-relaxed">
             Premium honey and bee products, harvested naturally and delivered with care across Kenya and beyond.
@@ -48,7 +48,7 @@ export function Footer() {
       </div>
       <div className="border-t border-cream/10">
         <div className="container-luxe flex flex-col items-center justify-between gap-2 py-6 text-xs text-cream/55 md:flex-row">
-          <span>© {new Date().getFullYear()} Ntarakwai Beekeeping Limited. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Ntarakwai Pure & Natural Honey. All rights reserved.</span>
           <span>Pure · Natural · Trusted</span>
         </div>
       </div>
