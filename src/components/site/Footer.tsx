@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Phone, Mail, MapPin } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo.jpg";
 
 export function Footer() {
   return (
@@ -8,11 +8,11 @@ export function Footer() {
       <div className="container-luxe grid gap-12 py-16 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-cream/20 bg-cream/95 p-1 shadow-sm sm:h-14 sm:w-14">
+            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-cream/20 bg-cream/95 shadow-sm sm:h-14 sm:w-14">
               <img
                 src={logo}
                 alt="Ntarakwai Pure & Natural Honey logo"
-                className="h-full w-full rounded-full object-contain"
+                className="absolute inset-0 h-full w-full rounded-full object-cover transform scale-110"
               />
             </span>
             <span className="font-display text-2xl">Ntarakwai Pure & Natural Honey<span className="text-honey">.</span></span>
