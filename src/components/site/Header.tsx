@@ -36,15 +36,15 @@ export function Header() {
     >
       <div className="container-luxe grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:grid-cols-[auto_1fr_auto]">
         <Link to="/" className="flex min-w-0 items-center gap-2.5">
-          <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-border/60 bg-cream/95 shadow-sm sm:h-14 sm:w-14">
+          <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#2f7041] bg-cream/95 shadow-sm sm:h-14 sm:w-14">
             <img
               src={logo}
-              alt="Nyarakwai Beekeeping limmited logo"
-              className="absolute inset-0 h-full w-full rounded-full object-cover transform scale-125"
+              alt="Nyarakwai Beekeeping Limited logo"
+              className="absolute left-[-50%] top-[-35%] h-[168%] w-[200%] max-w-none object-fill"
             />
           </span>
           <span className="font-display truncate text-xl font-semibold tracking-tight text-charcoal">
-            Nyarakwai Beekeeping limmited
+            Nyarakwai Beekeeping Limited
             <span className="text-honey-deep">.</span>
           </span>
         </Link>
