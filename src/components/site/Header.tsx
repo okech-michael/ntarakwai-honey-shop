@@ -40,7 +40,7 @@ export function Header() {
             <img
               src={logo}
               alt="Nyarakwai Beekeeping Limited logo"
-              className="absolute left-[-50%] top-[-42%] h-[168%] w-[200%] max-w-none object-fill"
+              className="absolute left-[-50%] top-[-35%] h-[168%] w-[200%] max-w-none object-fill"
             />
           </span>
           <span className="font-display truncate text-xl font-semibold tracking-tight text-charcoal">
