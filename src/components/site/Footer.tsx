@@ -11,11 +11,11 @@ export function Footer() {
             <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#2f7041] bg-cream/95 shadow-sm sm:h-14 sm:w-14">
               <img
                 src={logo}
-                alt="Nyarakwai Beekeeping limmited logo"
+                alt="Nyarakwai Beekeeping Limited logo"
                 className="absolute left-[-50%] top-[-42%] h-[168%] w-[200%] max-w-none object-fill"
               />
             </span>
-            <span className="font-display text-2xl">Nyarakwai Beekeeping limmited<span className="text-honey">.</span></span>
+            <span className="font-display text-2xl">Nyarakwai Beekeeping Limited<span className="text-honey">.</span></span>
           </div>
           <p className="mt-4 text-sm text-cream/70 leading-relaxed">
             Premium honey and bee products, harvested naturally and delivered with care across Kenya and beyond.
@@ -48,7 +48,7 @@ export function Footer() {
       </div>
       <div className="border-t border-cream/10">
         <div className="container-luxe flex flex-col items-center justify-between gap-2 py-6 text-xs text-cream/55 md:flex-row">
-          <span>© {new Date().getFullYear()} Nyarakwai Beekeeping limmited. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Nyarakwai Beekeeping Limited. All rights reserved.</span>
           <span>Pure · Natural · Trusted</span>
         </div>
       </div>
