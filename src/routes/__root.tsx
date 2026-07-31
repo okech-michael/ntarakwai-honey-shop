@@ -14,6 +14,7 @@ import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
 import { MobileCallButton } from "../components/site/MobileCallButton";
 import { CartProvider } from "../lib/cart";
+import logo from "@/assets/logo.jpg";
 
 function NotFoundComponent() {
   return (
@@ -86,13 +87,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "Ntarakwai Pure & Natural Honey — Premium Honey & Bee Products" },
       { name: "twitter:description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
-      { property: "og:image", content: "/logo.jpeg" },
-      { name: "twitter:image", content: "/logo.jpeg" },
+      { property: "og:image", content: logo },
+      { name: "twitter:image", content: logo },
     ],
     links: [
-      { rel: "icon", href: "/logo.jpeg", type: "image/jpeg" },
-      { rel: "shortcut icon", href: "/logo.jpeg", type: "image/jpeg" },
-      { rel: "apple-touch-icon", href: "/logo.jpeg" },
+      { rel: "icon", href: logo, type: "image/jpeg" },
+      { rel: "shortcut icon", href: logo, type: "image/jpeg" },
+      { rel: "apple-touch-icon", href: logo },
+      { rel: "icon", href: "/favicon.jpeg", type: "image/jpeg" },
+      { rel: "shortcut icon", href: "/favicon.jpeg", type: "image/jpeg" },
       { rel: "manifest", href: "/manifest.json" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
