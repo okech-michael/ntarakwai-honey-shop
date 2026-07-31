@@ -8,11 +8,11 @@ export function Footer() {
       <div className="container-luxe grid gap-12 py-16 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-cream/20 bg-cream/95 shadow-sm sm:h-14 sm:w-14">
+            <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#2f7041] bg-cream/95 shadow-sm sm:h-14 sm:w-14">
               <img
                 src={logo}
                 alt="Nyarakwai Beekeeping limmited logo"
-                className="absolute inset-0 h-full w-full rounded-full object-cover transform scale-125"
+                className="absolute left-[-50%] top-[-42%] h-[168%] w-[200%] max-w-none object-fill"
               />
             </span>
             <span className="font-display text-2xl">Nyarakwai Beekeeping limmited<span className="text-honey">.</span></span>
