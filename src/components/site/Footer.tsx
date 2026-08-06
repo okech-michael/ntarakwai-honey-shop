@@ -24,13 +24,18 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-widest text-honey">Explore</h4>
           <ul className="mt-4 space-y-2 text-sm text-cream/80">
-            <li><Link to="/about" className="hover:text-honey">About Us</Link></li>
+            <li><Link to="/about" className="hover:text-honey">Our Story</Link></li>
+            <li><Link to="/process" className="hover:text-honey">Our Process</Link></li>
+            <li><Link to="/community" className="hover:text-honey">Community</Link></li>
+            <li><Link to="/sustainability" className="hover:text-honey">Conservation</Link></li>
+            <li><Link to="/team" className="hover:text-honey">Our Team</Link></li>
             <li><Link to="/products" className="hover:text-honey">Products</Link></li>
             <li><Link to="/shop" className="hover:text-honey">Shop Online</Link></li>
             <li><Link to="/wholesale" className="hover:text-honey">Wholesale</Link></li>
             <li><Link to="/gallery" className="hover:text-honey">Gallery</Link></li>
             <li><Link to="/blog" className="hover:text-honey">Journal</Link></li>
           </ul>
+
         </div>
         <div>
           <h4 className="text-sm font-semibold uppercase tracking-widest text-honey">Contact</h4>
