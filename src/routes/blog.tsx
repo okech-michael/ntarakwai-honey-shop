@@ -22,9 +22,9 @@ const POSTS = [
 export const Route = createFileRoute("/blog")({
   head: () => ({
     meta: [
-      { title: "Journal — Ntarakuwai Pure & Natural Honey" },
+      { title: "Journal — Ntarakwai" },
       { name: "description", content: "Insights on the health benefits of honey, ethical beekeeping, natural wellness and product guides." },
-      { property: "og:title", content: "Ntarakuwai Pure & Natural Honey Journal" },
+      { property: "og:title", content: "Ntarakwai Journal" },
       { property: "og:description", content: "Stories from the apiary and the wellness bench." },
       { property: "og:image", content: pGift },
     ],

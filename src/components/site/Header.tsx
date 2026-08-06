@@ -6,13 +6,15 @@ import logo from "@/assets/logo.jpg";
 
 const NAV = [
   { to: "/", label: "Home" },
-  { to: "/about", label: "About" },
+  { to: "/about", label: "Our Story" },
   { to: "/products", label: "Products" },
-  { to: "/gallery", label: "Gallery" },
-  { to: "/wholesale", label: "Wholesale" },
-  { to: "/blog", label: "Journal" },
+  { to: "/process", label: "Process" },
+  { to: "/community", label: "Community" },
+  { to: "/sustainability", label: "Conservation" },
+  { to: "/team", label: "Team" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -39,12 +41,12 @@ export function Header() {
           <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#2f7041] bg-cream/95 shadow-sm sm:h-14 sm:w-14">
             <img
               src={logo}
-              alt="Nyarakwai Beekeeping Limited logo"
+              alt="Ntarakwai Beekeeping Limited logo"
               className="absolute left-[-50%] top-[-42%] h-[168%] w-[200%] max-w-none object-fill"
             />
           </span>
           <span className="font-display truncate text-xl font-semibold tracking-tight text-charcoal">
-            Nyarakwai Beekeeping Limited
+            Ntarakwai Beekeeping Limited
             <span className="text-honey-deep">.</span>
           </span>
         </Link>

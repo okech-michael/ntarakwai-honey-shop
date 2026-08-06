@@ -7,7 +7,7 @@ import { formatKES } from "@/lib/products";
 export const Route = createFileRoute("/shop/cart")({
   head: () => ({
     meta: [
-      { title: "Your Cart — Ntarakuwai Pure & Natural Honey Shop" },
+      { title: "Your Cart — Ntarakwai Shop" },
       { name: "description", content: "Review your honey order before checkout." },
     ],
   }),

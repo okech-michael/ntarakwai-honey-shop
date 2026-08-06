@@ -9,7 +9,7 @@ import hero from "@/assets/hero-honey.jpg";
 export const Route = createFileRoute("/shop/")({
   head: () => ({
     meta: [
-      { title: "Shop Premium Natural Honey Online — Ntarakuwai Pure & Natural Honey" },
+      { title: "Shop Premium Natural Honey Online — Ntarakwai" },
       { name: "description", content: "Order pure honey, beeswax, propolis, bee pollen and honey gift packs online. Delivery anywhere in Kenya via Via Wells Fargo or Nationwide delivery via your preferred parcel courier." },
       { property: "og:title", content: "Shop Premium Natural Honey Online" },
       { property: "og:description", content: "Pure honey harvested naturally and delivered directly to your doorstep anywhere in Kenya." },

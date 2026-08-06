@@ -8,9 +8,9 @@ import honeycomb from "@/assets/honeycomb.jpg";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Nyarakwai Beekeeping Limited" },
-      { name: "description", content: "Get in touch with Nyarakwai Beekeeping Limited for orders, wholesale enquiries and partnerships. Call 0711856795." },
-      { property: "og:title", content: "Contact Nyarakwai Beekeeping Limited" },
+      { title: "Contact Ntarakwai Beekeeping Limited" },
+      { name: "description", content: "Get in touch with Ntarakwai Beekeeping Limited for orders, wholesale enquiries and partnerships. Call 0711856795." },
+      { property: "og:title", content: "Contact Ntarakwai Beekeeping Limited" },
       { property: "og:description", content: "We'd love to hear from you." },
       { property: "og:image", content: honeycomb },
     ],
@@ -56,7 +56,7 @@ function Contact() {
 
             <div className="overflow-hidden rounded-3xl border border-border bg-card">
               <iframe
-                title="Nyarakwai Beekeeping Limited location"
+                title="Ntarakwai Beekeeping Limited location"
                 src="https://www.google.com/maps?q=Mt.%20Kulal,Kenya&output=embed"
                 className="h-64 w-full"
                 loading="lazy"

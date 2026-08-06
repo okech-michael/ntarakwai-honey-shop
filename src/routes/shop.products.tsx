@@ -16,7 +16,7 @@ export const Route = createFileRoute("/shop/products")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "All Products — Ntarakuwai Pure & Natural Honey Shop" },
+      { title: "All Products — Ntarakwai Shop" },
       { name: "description", content: "Browse every honey and bee product available for online order: raw honey, organic, beeswax, propolis, pollen and gift sets." },
       { property: "og:title", content: "Shop All Honey Products" },
       { property: "og:description", content: "Pure honey and bee products available for nationwide delivery in Kenya." },

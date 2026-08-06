@@ -281,7 +281,7 @@ async function initiateMpesaPayment({ amount, phone, orderNumber }: { amount: nu
       PhoneNumber: phoneNumber,
       CallBackURL: callbackUrl,
       AccountReference: orderNumber,
-      TransactionDesc: `Ntarakuwai Pure & Natural Honey order ${orderNumber}`,
+      TransactionDesc: `Ntarakwai order ${orderNumber}`,
     }),
   });
 
