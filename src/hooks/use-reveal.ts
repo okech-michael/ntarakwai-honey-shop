@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 export function useReveal() {
   useEffect(() => {
-    const els = document.querySelectorAll<HTMLElement>(".reveal");
+    const els = document.querySelectorAll<HTMLElement>(".reveal, .reveal-slow");
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {

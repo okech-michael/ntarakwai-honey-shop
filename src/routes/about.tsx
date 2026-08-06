@@ -1,112 +1,250 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/use-reveal";
+import { useParallax } from "@/hooks/use-parallax";
 import { PageHero } from "@/components/site/PageHero";
-import { Phone, Target, Eye, Sprout, BadgeCheck, Leaf } from "lucide-react";
+import { SectionHead, ParallaxBand, StatRow, Eyebrow } from "@/components/site/Story";
+import { ArrowRight, Target, Eye, MapPin, ShoppingBag } from "lucide-react";
+import { BRAND, FACTS, VALUES, AMBITIONS } from "@/lib/brand";
 import beekeeper from "@/assets/beekeeper.jpg";
+import mtKulal from "@/assets/mt-kulal.jpg";
+import forest from "@/assets/kulal-forest.jpg";
+import apiary from "@/assets/apiary-kulal.jpg";
+import community from "@/assets/community-training.jpg";
 import honeycomb from "@/assets/honeycomb.jpg";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Ntarakuwai Pure & Natural Honey — Beekeeping with purpose" },
-      { name: "description", content: "Our story, mission, beekeeping process and commitment to ethical, sustainable honey production in Kenya." },
-      { property: "og:title", content: "About Ntarakuwai Pure & Natural Honey" },
-      { property: "og:description", content: "Beekeeping with purpose — pure honey, ethical practice." },
-      { property: "og:image", content: beekeeper },
+      { title: "About Ntarakwai — Conservation-Driven Beekeeping on Mt. Kulal" },
+      { name: "description", content: "The story of Ntarakwai Beekeeping Limited: founder Ledany Timothy, Mt. Kulal in Marsabit County, our mission, vision, core values and where we are heading." },
+      { property: "og:title", content: "About Ntarakwai Beekeeping Limited" },
+      { property: "og:description", content: "A conservation-driven honey company born on Mt. Kulal, Loiyangalani Ward, Marsabit County." },
+      { property: "og:type", content: "article" },
+      { property: "og:image", content: mtKulal },
+      { name: "twitter:image", content: mtKulal },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "/about" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: BRAND.legalName,
+          founder: { "@type": "Person", name: BRAND.founder },
+          foundingDate: "2026-06",
+          email: BRAND.email,
+          telephone: BRAND.phone,
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Gatab, Mt. Kulal",
+            addressRegion: "Marsabit County",
+            addressCountry: "KE",
+          },
+        }),
+      },
     ],
   }),
   component: About,
 });
 
-const TIMELINE = [
-  { year: "2012", title: "The first hive", body: "A single hive in the highlands sparked a family devotion to natural beekeeping." },
-  { year: "2016", title: "Co-op formed", body: "Partnered with smallholder farmers to formalise ethical harvesting." },
-  { year: "2020", title: "Lab-grade testing", body: "Introduced batch testing and full traceability across every jar." },
-  { year: "Today", title: "National supply", body: "Trusted by hotels, supermarkets and wellness brands across Kenya." },
-];
-
 function About() {
   useReveal();
+  useParallax();
+
   return (
     <>
       <PageHero
-        eyebrow="About Us"
-        image={beekeeper}
-        title={<>A devotion to <em className="text-honey">pure, honest</em> honey.</>}
-        subtitle="Twelve years of patient craft, ethical beekeeping and quality assurance — bottled in every drop."
+        eyebrow="Our Story"
+        image={mtKulal}
+        title={<>A company that began with a boy, a hive, and a <em className="text-honey">mountain</em>.</>}
+        subtitle="Ntarakwai Beekeeping Limited produces raw honey and beeswax on Mt. Kulal while building a market for the community that harvests beside us."
       >
-        <a href="tel:+254711856795" className="btn-honey"><Phone className="h-4 w-4" /> Call +254 711 856 795</a>
+        <Link to="/shop" className="btn-honey"><ShoppingBag className="h-4 w-4" /> Shop the harvest</Link>
       </PageHero>
 
-      <section className="bg-background py-24">
+      {/* Founder journey */}
+      <section className="bg-background py-24 md:py-32">
+        <div className="container-luxe grid gap-16 lg:grid-cols-[1.15fr_1fr] lg:items-start">
+          <div className="reveal-slow">
+            <Eyebrow>The founder</Eyebrow>
+            <h2 className="font-display mt-4 text-4xl leading-[1.06] text-charcoal md:text-5xl">
+              {BRAND.founder} started keeping bees at <em className="text-honey-deep">fifteen</em>.
+            </h2>
+            <p className="dropcap mt-7 text-lg leading-relaxed text-muted-foreground">
+              He grew up around Mt. Kulal, in a place where honey has always been part of life. What struck him
+              early was the contradiction: the region produces exceptional honey — the biodiversity and untouched
+              environment see to that — and yet the people harvesting it had nowhere consistent to sell.
+            </p>
+            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+              A trader might come. A price might be offered. Neither was reliable enough to build a household
+              around. Good honey was routinely sold for less than it was worth, or not sold at all.
+            </p>
+            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+              So rather than starting another honey business, he set out to build something that solved several
+              problems at once: produce authentic, high-quality honey; create a sustainable market for local
+              beekeepers; promote environmental conservation; generate employment for local youth; protect Mt.
+              Kulal's unique ecosystem; and build a nationally recognised premium honey brand out of all of it.
+            </p>
+            <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+              {BRAND.legalName} was registered as a limited company in {BRAND.registered}, and operates from its
+              honey shop in {BRAND.shop}.
+            </p>
+          </div>
+
+          <div className="reveal-slow space-y-6">
+            <div className="overflow-hidden rounded-[2rem] shadow-[var(--shadow-luxe)]">
+              <img src={beekeeper} alt="Working a hive on the slopes of Mt. Kulal" className="h-full w-full object-cover" loading="lazy" width={1280} height={896} />
+            </div>
+            <div className="rounded-[2rem] border border-border bg-card p-8">
+              <div className="flex items-start gap-3">
+                <MapPin className="mt-1 h-5 w-5 shrink-0 text-honey-deep" />
+                <div>
+                  <div className="font-display text-xl text-charcoal">Where we are</div>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{BRAND.location}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                    Two apiaries on the mountain, one honey shop in Gatab, and a network of gatherers across the
+                    surrounding slopes.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mt Kulal */}
+      <ParallaxBand image={forest} alt="" speed={0.2} className="py-24 md:py-32" overlay="from-charcoal/90 via-charcoal/78 to-charcoal/92">
+        <div className="grid gap-14 lg:grid-cols-2 lg:items-center">
+          <div className="reveal-slow">
+            <Eyebrow tone="light">Mt. Kulal</Eyebrow>
+            <h2 className="font-display mt-4 text-4xl leading-[1.06] text-cream md:text-5xl">
+              The place is not a backdrop. It is the <em className="text-honey">ingredient</em>.
+            </h2>
+            <p className="mt-7 text-lg leading-relaxed text-cream/75">
+              Mt. Kulal stands in northern Kenya's dry lands, catching cloud and holding a belt of indigenous
+              forest that has no equivalent nearby. Its biodiversity and its distance from farmland are exactly
+              why the honey is what it is.
+            </p>
+            <p className="mt-5 text-lg leading-relaxed text-cream/75">
+              Bees forage on wild, unsprayed vegetation. No monoculture flattens the flavour, and no agricultural
+              chemistry follows it into the comb. Season by season, the honey carries whatever the mountain chose
+              to flower.
+            </p>
+          </div>
+          <div className="reveal-slow overflow-hidden rounded-[2.5rem]">
+            <img src={apiary} alt="Hives sited on a rocky slope of Mt. Kulal" className="h-full w-full object-cover" loading="lazy" width={1600} height={1104} />
+          </div>
+        </div>
+        <div className="mt-16">
+          <StatRow items={FACTS} />
+        </div>
+      </ParallaxBand>
+
+      {/* Mission & Vision */}
+      <section className="bg-background py-24 md:py-32">
         <div className="container-luxe grid gap-6 md:grid-cols-2">
           {[
-            { icon: Target, title: "Our Mission", body: "To deliver the purest honey and bee products while uplifting Kenyan beekeepers and protecting pollinators." },
-            { icon: Eye, title: "Our Vision", body: "To become East Africa's most trusted premium honey brand — synonymous with quality, ethics and craft." },
-          ].map((b) => (
-            <div key={b.title} className="reveal rounded-3xl border border-border bg-card p-10 shadow-sm">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-honey/20 text-honey-deep">
+            {
+              icon: Target,
+              title: "Our Mission",
+              body: "To empower local communities through sustainable honey production, conservation, eco-tourism and transparent business practices — while promoting inclusive economic growth across Marsabit County and Kenya.",
+            },
+            {
+              icon: Eye,
+              title: "Our Vision",
+              body: "To become East Africa's leading conservation-driven premium honey company, and to transform Mt. Kulal into a recognised centre for sustainable beekeeping, environmental conservation, eco-tourism and research.",
+            },
+          ].map((b, i) => (
+            <div key={b.title} className="reveal-slow rounded-[2rem] border border-border bg-card p-10 shadow-sm md:p-12" style={{ transitionDelay: `${i * 120}ms` }}>
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-honey/35 to-honey-deep/20 text-honey-deep">
                 <b.icon className="h-5 w-5" />
               </span>
-              <h3 className="font-display mt-6 text-3xl text-charcoal">{b.title}</h3>
-              <p className="mt-3 leading-relaxed text-muted-foreground">{b.body}</p>
+              <h3 className="font-display mt-7 text-3xl text-charcoal">{b.title}</h3>
+              <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{b.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-secondary/60 py-24">
+      {/* Values */}
+      <section className="bg-secondary/50 py-24 md:py-32">
         <div className="container-luxe">
-          <div className="reveal mx-auto max-w-2xl text-center">
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-honey-deep">Our journey</span>
-            <h2 className="font-display mt-3 text-4xl text-charcoal md:text-5xl">From one hive to a national brand</h2>
-          </div>
-          <ol className="relative mx-auto mt-14 max-w-3xl">
-            <span className="absolute left-3 top-2 hidden h-[calc(100%-1rem)] w-px bg-honey/40 md:block md:left-1/2" />
-            {TIMELINE.map((t, i) => (
-              <li key={t.year} className={`reveal relative mb-10 grid gap-6 md:grid-cols-2 md:gap-12 ${i % 2 ? "md:[&>*:first-child]:order-2" : ""}`}>
-                <div className="md:text-right">
-                  <div className="font-display text-3xl text-honey-deep">{t.year}</div>
-                  <h3 className="font-display mt-1 text-2xl text-charcoal">{t.title}</h3>
-                </div>
-                <p className="text-muted-foreground md:pt-2">{t.body}</p>
-              </li>
+          <SectionHead
+            eyebrow="Core values"
+            title={<>Nine things we are not willing to <em className="text-honey-deep">trade away</em>.</>}
+          />
+          <div className="mt-16 grid gap-px overflow-hidden rounded-[2rem] border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+            {VALUES.map((v, i) => (
+              <div key={v.title} className="reveal-slow bg-card p-8" style={{ transitionDelay: `${(i % 3) * 90}ms` }}>
+                <div className="font-display text-xs uppercase tracking-[0.24em] text-honey-deep">{String(i + 1).padStart(2, "0")}</div>
+                <h3 className="font-display mt-3 text-2xl text-charcoal">{v.title}</h3>
+                <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">{v.body}</p>
+              </div>
             ))}
-          </ol>
-        </div>
-      </section>
-
-      <section className="bg-background py-24">
-        <div className="container-luxe grid items-center gap-14 md:grid-cols-2">
-          <div className="reveal">
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-honey-deep">Beekeeping process</span>
-            <h2 className="font-display mt-3 text-4xl text-charcoal md:text-5xl">Slow craft, faithful to the bees</h2>
-            <ul className="mt-8 space-y-5">
-              {[
-                { icon: Sprout, t: "Hive placement", d: "Hives are sited in pristine forests and flowering meadows." },
-                { icon: Leaf, t: "Patient harvest", d: "We harvest only the surplus, never depleting a colony." },
-                { icon: BadgeCheck, t: "Cold extraction", d: "Honey is cold-extracted to preserve enzymes and aroma." },
-              ].map((s) => (
-                <li key={s.t} className="flex gap-4">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-honey/20 text-honey-deep"><s.icon className="h-4 w-4" /></span>
-                  <div>
-                    <div className="font-display text-lg text-charcoal">{s.t}</div>
-                    <p className="text-sm text-muted-foreground">{s.d}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
           </div>
-          <img src={honeycomb} alt="Macro honeycomb" className="reveal rounded-[2rem] shadow-[var(--shadow-card)]" loading="lazy" width={1280} height={896} />
         </div>
       </section>
 
-      <section className="bg-charcoal py-20 text-cream">
-        <div className="container-luxe flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <h2 className="font-display max-w-2xl text-3xl md:text-4xl">Visit our apiary or speak with our team today.</h2>
-          <Link to="/contact" className="btn-honey">Get in touch</Link>
+      {/* Community teaser */}
+      <section className="bg-background py-24 md:py-32">
+        <div className="container-luxe grid gap-14 lg:grid-cols-2 lg:items-center">
+          <div className="reveal-slow overflow-hidden rounded-[2.5rem] shadow-[var(--shadow-luxe)]">
+            <img src={community} alt="Local beekeepers in a training session near Mt. Kulal" className="h-full w-full object-cover" loading="lazy" width={1600} height={1104} />
+          </div>
+          <div className="reveal-slow">
+            <Eyebrow>The wider circle</Eyebrow>
+            <h2 className="font-display mt-4 text-4xl leading-[1.06] text-charcoal md:text-5xl">
+              We buy from more than thirty <em className="text-honey-deep">independent beekeepers</em>.
+            </h2>
+            <p className="mt-7 text-lg leading-relaxed text-muted-foreground">
+              Our own 55 hives are only part of the story. Purchasing honey from local gatherers creates income
+              for communities that previously lacked reliable markets, and our continuous training raises both
+              the quality of their harvest and what it can earn.
+            </p>
+            <div className="mt-9 flex flex-wrap gap-3">
+              <Link to="/community" className="btn-honey">Community impact <ArrowRight className="h-4 w-4" /></Link>
+              <Link to="/team" className="btn-outline-honey">Meet the team</Link>
+            </div>
+          </div>
         </div>
       </section>
+
+      {/* Roadmap */}
+      <section className="bg-charcoal py-24 text-cream md:py-32">
+        <div className="container-luxe">
+          <SectionHead
+            tone="light"
+            eyebrow="Where we are heading"
+            title={<>A young company with a long <em className="text-honey">horizon</em>.</>}
+            intro="These are the ambitions the company was built around — pursued at the pace the mountain, the bees and the community can carry."
+          />
+          <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {AMBITIONS.map((a, i) => (
+              <div
+                key={a.title}
+                className="reveal-slow rounded-3xl border border-cream/15 bg-cream/[0.04] p-8 transition-transform duration-700 hover:-translate-y-1.5"
+                style={{ transitionDelay: `${i * 90}ms` }}
+              >
+                <div className="font-display text-3xl text-honey/70">{String(i + 1).padStart(2, "0")}</div>
+                <h3 className="font-display mt-4 text-2xl">{a.title}</h3>
+                <p className="mt-3 text-sm leading-relaxed text-cream/70">{a.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <ParallaxBand image={honeycomb} alt="" speed={0.12} overlay="from-charcoal/90 via-charcoal/78 to-charcoal/60">
+        <div className="flex flex-col items-start gap-8 py-24 md:flex-row md:items-center md:justify-between">
+          <div className="reveal max-w-2xl">
+            <h2 className="font-display text-4xl leading-tight text-cream md:text-5xl">Come and see the mountain for yourself.</h2>
+            <p className="mt-4 text-cream/75">Visit the honey shop in Gatab, or speak with our team about orders, wholesale and partnerships.</p>
+          </div>
+          <Link to="/contact" className="btn-honey">Get in touch <ArrowRight className="h-4 w-4" /></Link>
+        </div>
+      </ParallaxBand>
     </>
   );
 }
