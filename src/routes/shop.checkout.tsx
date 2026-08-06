@@ -8,7 +8,7 @@ import { formatKES } from "@/lib/products";
 export const Route = createFileRoute("/shop/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Ntarakuwai Pure & Natural Honey Shop" },
+      { title: "Checkout — Ntarakwai Shop" },
       { name: "description", content: "Securely complete your honey order with M-Pesa or bank transfer." },
     ],
   }),
@@ -266,7 +266,7 @@ function Checkout() {
                       <div className="text-xs font-semibold uppercase tracking-widest text-honey-deep">Bank Details</div>
                       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                         <div><dt className="text-muted-foreground">Bank Name</dt><dd className="font-medium text-charcoal">Equity Bank Kenya</dd></div>
-                        <div><dt className="text-muted-foreground">Account Name</dt><dd className="font-medium text-charcoal">Ntarakuwai Pure & Natural Honey</dd></div>
+                        <div><dt className="text-muted-foreground">Account Name</dt><dd className="font-medium text-charcoal">Ntarakwai</dd></div>
                         <div><dt className="text-muted-foreground">Account Number</dt><dd className="font-medium text-charcoal">0100200300400</dd></div>
                         <div><dt className="text-muted-foreground">Branch</dt><dd className="font-medium text-charcoal">Westlands</dd></div>
                         <div><dt className="text-muted-foreground">Swift Code</dt><dd className="font-medium text-charcoal">EQBLKENA</dd></div>

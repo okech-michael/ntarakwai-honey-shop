@@ -12,7 +12,7 @@ export const Route = createFileRoute("/shop/checkout/success")({
   validateSearch: search,
   head: () => ({
     meta: [
-      { title: "Order Confirmed — Ntarakuwai Pure & Natural Honey Shop" },
+      { title: "Order Confirmed — Ntarakwai Shop" },
       { name: "description", content: "Your honey order has been received." },
       { name: "robots", content: "noindex" },
     ],
