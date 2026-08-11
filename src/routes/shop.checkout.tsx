@@ -15,9 +15,12 @@ export const Route = createFileRoute("/shop/checkout")({
   component: Checkout,
 });
 
-const COUNTIES = [
-  "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Thika", "Nyeri", "Meru",
-  "Machakos", "Kakamega", "Kisii", "Kericho", "Embu", "Kitale", "Garissa", "Malindi", "Other",
+const DELIVERY_COUNTIES = [
+  "Marsabit",
+  "Isiolo",
+  "Meru",
+  "Laikipia",
+  "Nairobi",
 ];
 
 type Step = 1 | 2 | 3;
@@ -49,8 +52,8 @@ function Checkout() {
   const delivery = useMemo(() => {
     if (subtotal === 0) return 0;
     if (info.county === "Nairobi") return 250;
-    if (["Mombasa", "Kisumu", "Nakuru", "Eldoret", "Thika"].includes(info.county)) return 400;
-    return 550;
+    if (["Marsabit", "Isiolo", "Meru", "Laikipia"].includes(info.county)) return 550;
+    return 0;
   }, [info.county, subtotal]);
   const total = subtotal + delivery;
 
@@ -67,6 +70,18 @@ function Checkout() {
 
   function handleStep1(e: FormEvent) {
     e.preventDefault();
+
+    if (!DELIVERY_COUNTIES.includes(info.county)) {
+      setError("We currently deliver only within Marsabit, Isiolo, Meru, Laikipia (Nanyuki), and Nairobi.");
+      return;
+    }
+
+    if (info.county === "Laikipia" && info.town.trim().toLowerCase() !== "nanyuki") {
+      setError("For Laikipia, delivery is currently available only in Nanyuki.");
+      return;
+    }
+
+    setError("");
     setStep(2);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -143,6 +158,7 @@ function Checkout() {
                 <p className="mt-2 text-sm text-muted-foreground">Where should we deliver your honey?</p>
 
                 <div className="mt-7 grid gap-5">
+                  {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
                   <Field label="Full Name" value={info.fullName} onChange={(v) => setInfo({ ...info, fullName: v })} required />
                   <div className="grid gap-5 sm:grid-cols-2">
                     <Field label="Phone Number" type="tel" placeholder="07XX XXX XXX" value={info.phone} onChange={(v) => setInfo({ ...info, phone: v })} required />
@@ -156,10 +172,10 @@ function Checkout() {
                         onChange={(e) => setInfo({ ...info, county: e.target.value })}
                         className="mt-1.5 w-full rounded-full border border-input bg-background px-5 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30"
                       >
-                        {COUNTIES.map((c) => <option key={c}>{c}</option>)}
+                        {DELIVERY_COUNTIES.map((c) => <option key={c}>{c}</option>)}
                       </select>
                     </label>
-                    <Field label="Town" value={info.town} onChange={(v) => setInfo({ ...info, town: v })} required />
+                    <Field label="Town" placeholder={info.county === "Laikipia" ? "Nanyuki" : "Town or area"} value={info.town} onChange={(v) => setInfo({ ...info, town: v })} required />
                   </div>
                   <Field label="Nearest Landmark" value={info.landmark} onChange={(v) => setInfo({ ...info, landmark: v })} placeholder="e.g. Junction Mall" required />
                   <label className="text-sm font-medium text-charcoal">
