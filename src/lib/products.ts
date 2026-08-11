@@ -1,5 +1,7 @@
 import ntaraHoney from "@/assets/ntaraHoney.jpeg";
-import pPure from "@/assets/product-pure-honey.jpg";
+import rawHoney01 from "@/assets/WhatsApp Image 2026-08-07 at 10.59.07.jpeg";
+import rawHoney02 from "@/assets/WhatsApp Image 2026-08-07 at 10.59.08 (1).jpeg";
+import rawHoney03 from "@/assets/WhatsApp Image 2026-08-07 at 10.59.08.jpeg";
 import pProcessed from "@/assets/product-processed.jpg";
 import pBeeswax from "@/assets/product-beeswax.jpg";
 import pPropolis from "@/assets/product-propolis.jpg";
@@ -8,7 +10,6 @@ import pGift from "@/assets/product-gift.jpg";
 
 export type ShopCategory =
   | "Raw Honey"
-  | "Processed Honey"
   | "Beeswax"
   | "Propolis"
   | "Bee Pollen"
@@ -46,7 +47,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "ntara-honey",
     name: "Ntara Honey",
     category: "Raw Honey",
-    image: ntaraHoney,
+    image: rawHoney01,
     weight: "500g",
     price: 950,
     stock: 20,
@@ -61,7 +62,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "pure-raw-honey-500g",
     name: "Pure Raw Honey",
     category: "Raw Honey",
-    image: pPure,
+    image: rawHoney02,
     weight: "500g",
     price: 850,
     oldPrice: 950,
@@ -77,7 +78,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "pure-raw-honey-1kg",
     name: "Pure Raw Honey — Family Jar",
     category: "Raw Honey",
-    image: pPure,
+    image: rawHoney03,
     weight: "1kg",
     price: 1600,
     stock: 28,
@@ -91,7 +92,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "organic-wildflower-honey",
     name: "Organic Wildflower Honey",
     category: "Raw Honey",
-    image: pPure,
+    image: rawHoney01,
     weight: "500g",
     price: 1100,
     stock: 18,
@@ -105,7 +106,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     id: "processed-500",
     slug: "processed-clear-honey-500g",
     name: "Processed Clear Honey",
-    category: "Processed Honey",
+    category: "Raw Honey",
     image: pProcessed,
     weight: "500g",
     price: 720,
@@ -194,7 +195,6 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
 
 export const SHOP_CATEGORIES: ShopCategory[] = [
   "Raw Honey",
-  "Processed Honey",
   "Beeswax",
   "Propolis",
   "Bee Pollen",
