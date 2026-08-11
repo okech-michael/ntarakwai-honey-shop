@@ -41,7 +41,7 @@ export function Footer() {
           <h4 className="text-sm font-semibold uppercase tracking-widest text-honey">Contact</h4>
           <ul className="mt-4 space-y-3 text-sm text-cream/80">
             <li className="flex items-start gap-2"><Phone className="mt-0.5 h-4 w-4 text-honey" /><a href="tel:+254711856795">0711856795</a></li>
-            <li className="flex items-start gap-2"><Mail className="mt-0.5 h-4 w-4 text-honey" /><a href="mailto:ntarakwai2023@gmail.com">ntarakwai2023@gmail.com</a></li>
+            <li className="flex items-start gap-2"><Mail className="mt-0.5 h-4 w-4 text-honey" /><a href="mailto:ntarakwaibeekeeping@gmail.com">ntarakwaibeekeeping@gmail.com</a></li>
             <li className="flex items-start gap-2"><MapPin className="mt-0.5 h-4 w-4 text-honey" />Mt. Kulal, Kenya</li>
           </ul>
         </div>
