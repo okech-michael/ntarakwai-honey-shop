@@ -8,7 +8,6 @@ import pGift from "@/assets/product-gift.jpg";
 
 export type ShopCategory =
   | "Raw Honey"
-  | "Processed Honey"
   | "Beeswax"
   | "Propolis"
   | "Bee Pollen"
@@ -103,17 +102,17 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
   },
   {
     id: "processed-500",
-    slug: "processed-clear-honey-500g",
-    name: "Processed Clear Honey",
-    category: "Processed Honey",
+    slug: "unprocessed-honey-500g",
+    name: "Unprocessed Honey",
+    category: "Raw Honey",
     image: pProcessed,
     weight: "500g",
     price: 720,
     stock: 65,
-    shortDesc: "Lightly filtered, smooth and pourable — ideal for hospitality.",
+    shortDesc: "Pure, naturally preserved honey with the full mountain character intact.",
     description:
-      "Gently warmed and finely filtered for a crystal-clear pour and silky texture. A consistent choice for cafés, hotels and busy kitchens that want premium quality without the crystallisation.",
-    benefits: ["Smooth pour", "Long shelf life", "Hospitality-ready"],
+      "Our unprocessed honey is gently handled to retain the original floral depth, aroma and natural texture. It is not heated or heavily filtered, so it remains as close to the hive as possible.",
+    benefits: ["Naturally preserved", "Full floral depth", "Raw and authentic"],
   },
   {
     id: "beeswax-250",
@@ -194,7 +193,6 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
 
 export const SHOP_CATEGORIES: ShopCategory[] = [
   "Raw Honey",
-  "Processed Honey",
   "Beeswax",
   "Propolis",
   "Bee Pollen",
