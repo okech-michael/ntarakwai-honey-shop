@@ -34,7 +34,7 @@ function Team() {
       <PageHero
         eyebrow="Our Team"
         image={beekeeper}
-        title={<>Four people, one mountain, a very <em className="text-honey">clear</em> job.</>}
+        title={<>Five people, one mountain, a very <em className="text-honey">clear</em> job.</>}
         subtitle="Ntarakwai is run from Gatab by a small team who live where the honey is made."
       />
 
@@ -79,9 +79,15 @@ function Team() {
                   <a href={`mailto:${BRAND.email}`} className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary">
                     <Mail className="h-3.5 w-3.5" /> Email
                   </a>
-                  <a href={BRAND.phoneHref} className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary">
-                    <Phone className="h-3.5 w-3.5" /> {BRAND.phoneDisplay}
-                  </a>
+                  {m.phone ? (
+                    <a href={m.phoneHref} className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary">
+                      <Phone className="h-3.5 w-3.5" /> {m.phone}
+                    </a>
+                  ) : (
+                    <a href={BRAND.phoneHref} className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary">
+                      <Phone className="h-3.5 w-3.5" /> {BRAND.phoneDisplay}
+                    </a>
+                  )}
                 </div>
               </article>
             ))}

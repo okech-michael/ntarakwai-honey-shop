@@ -50,6 +50,8 @@ export const TEAM = [
     bio: "Leorian runs everything that happens on the mountain — where hives sit, how colonies are faring, and when a harvest is genuinely ready. He leads the field teams through inspection, harvesting and hive maintenance.",
     duties: ["Apiary operations", "Hive management and colony health", "Harvesting activities", "Field team leadership"],
     initials: "LL",
+    phone: "0718 572 756",
+    phoneHref: "tel:+254718572756",
   },
   {
     name: "John Lelerai",
@@ -58,6 +60,8 @@ export const TEAM = [
     bio: "John oversees the quiet, unglamorous work that protects the honey: settling, straining, packaging standards and food safety compliance. Nothing leaves Gatab without passing his bench.",
     duties: ["Honey processing", "Quality assurance", "Packaging standards", "Food safety compliance"],
     initials: "JL",
+    phone: "0732 463 008",
+    phoneHref: "tel:+254732463008",
   },
   {
     name: "Leah Susana Lemosor",
@@ -66,6 +70,18 @@ export const TEAM = [
     bio: "Leah carries the story of Mt. Kulal to the rest of Kenya — building the brand, winning customers and partners, and making sure the growth reaching the mountain is real and sustained.",
     duties: ["Marketing and branding", "Customer acquisition", "Partnerships", "Sales growth"],
     initials: "LS",
+    phone: "0713 976 081",
+    phoneHref: "tel:+254713976081",
+  },
+  {
+    name: "Nicholas Leparie",
+    role: "Monitoring & Evaluation Officer",
+    expertise: "Monitoring, evaluation & data systems",
+    bio: "Nicholas helps keep the work measurable and accountable, tracking progress, learning and evidence so the team can make informed decisions.",
+    duties: ["Monitoring and evaluation", "Data collection and reporting", "Progress tracking", "Learning and improvement"],
+    initials: "NL",
+    phone: "0746 828 483",
+    phoneHref: "tel:+254746828483",
   },
 ] as const;
 
