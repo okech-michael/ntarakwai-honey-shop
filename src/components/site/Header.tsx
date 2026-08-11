@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown, Menu, ShoppingBag, X } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import logo from "@/assets/logo.jpg";
@@ -32,6 +32,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [activeDesktopDropdown, setActiveDesktopDropdown] = useState<"story" | "impact" | null>(null);
   const [activeMobileDropdown, setActiveMobileDropdown] = useState<"story" | "impact" | null>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
   const { count } = useCart();
 
   useEffect(() => {
@@ -41,8 +42,24 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    function handleOutsideClick(event: MouseEvent) {
+      if (!headerRef.current) return;
+
+      if (!headerRef.current.contains(event.target as Node)) {
+        setActiveDesktopDropdown(null);
+        setActiveMobileDropdown(null);
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
   return (
     <header
+      ref={headerRef}
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled
           ? "bg-background/85 backdrop-blur-xl border-b border-border/60 py-3"
@@ -83,16 +100,19 @@ export function Header() {
             const isOpen = activeDesktopDropdown === (item.label === "Our Story" ? "story" : "impact");
 
             return (
-              <div
-                key={item.label}
-                className="relative"
-                onMouseEnter={() => setActiveDesktopDropdown(item.label === "Our Story" ? "story" : "impact")}
-                onMouseLeave={() => setActiveDesktopDropdown(null)}
-              >
+              <div key={item.label} className="relative">
                 <button
                   type="button"
                   aria-expanded={isOpen}
-                  onClick={() => setActiveDesktopDropdown(isOpen ? null : item.label === "Our Story" ? "story" : "impact")}
+                  onClick={() =>
+                    setActiveDesktopDropdown((current) =>
+                      current === (item.label === "Our Story" ? "story" : "impact")
+                        ? null
+                        : item.label === "Our Story"
+                          ? "story"
+                          : "impact",
+                    )
+                  }
                   className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-charcoal xl:px-4"
                 >
                   <span>{item.label}</span>
@@ -100,11 +120,12 @@ export function Header() {
                 </button>
 
                 {isOpen && (
-                  <div className="absolute left-0 top-full z-50 mt-2 min-w-44 rounded-2xl border border-border bg-background p-2 shadow-lg">
+                  <div className="absolute left-0 top-full z-50 mt-0 min-w-44 rounded-2xl border border-border bg-background p-2 shadow-lg">
                     {item.items.map((subItem) => (
                       <Link
                         key={subItem.to}
                         to={subItem.to}
+                        onClick={() => setActiveDesktopDropdown(null)}
                         className="block rounded-xl px-3 py-2 text-sm text-foreground/80 transition-colors hover:bg-secondary hover:text-charcoal"
                         activeProps={{ className: "bg-secondary text-charcoal" }}
                       >
@@ -186,7 +207,15 @@ export function Header() {
                   <div key={item.label} className="rounded-xl border border-border bg-card">
                     <button
                       type="button"
-                      onClick={() => setActiveMobileDropdown(isOpen ? null : item.label === "Our Story" ? "story" : "impact")}
+                      onClick={() => {
+                        setActiveMobileDropdown((current) =>
+                          current === (item.label === "Our Story" ? "story" : "impact")
+                            ? null
+                            : item.label === "Our Story"
+                              ? "story"
+                              : "impact",
+                        );
+                      }}
                       className="flex w-full items-center justify-between px-4 py-3 text-left text-base font-medium text-foreground/80"
                     >
                       <span>{item.label}</span>
@@ -198,7 +227,10 @@ export function Header() {
                           <Link
                             key={subItem.to}
                             to={subItem.to}
-                            onClick={() => setOpen(false)}
+                            onClick={() => {
+                              setOpen(false);
+                              setActiveMobileDropdown(null);
+                            }}
                             className="block rounded-lg px-3 py-2.5 text-sm text-foreground/75 hover:bg-secondary hover:text-charcoal"
                           >
                             {subItem.label}
