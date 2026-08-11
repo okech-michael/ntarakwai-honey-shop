@@ -1,7 +1,5 @@
 import ntaraHoney from "@/assets/ntaraHoney.jpeg";
-import rawHoney01 from "@/assets/WhatsApp Image 2026-08-07 at 10.59.07.jpeg";
-import rawHoney02 from "@/assets/WhatsApp Image 2026-08-07 at 10.59.08 (1).jpeg";
-import rawHoney03 from "@/assets/WhatsApp Image 2026-08-07 at 10.59.08.jpeg";
+import pPure from "@/assets/product-pure-honey.jpg";
 import pProcessed from "@/assets/product-processed.jpg";
 import pBeeswax from "@/assets/product-beeswax.jpg";
 import pPropolis from "@/assets/product-propolis.jpg";
@@ -47,7 +45,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "ntara-honey",
     name: "Ntara Honey",
     category: "Raw Honey",
-    image: rawHoney01,
+    image: ntaraHoney,
     weight: "500g",
     price: 950,
     stock: 20,
@@ -62,7 +60,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "pure-raw-honey-500g",
     name: "Pure Raw Honey",
     category: "Raw Honey",
-    image: rawHoney02,
+    image: pPure,
     weight: "500g",
     price: 850,
     oldPrice: 950,
@@ -78,7 +76,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "pure-raw-honey-1kg",
     name: "Pure Raw Honey — Family Jar",
     category: "Raw Honey",
-    image: rawHoney03,
+    image: pPure,
     weight: "1kg",
     price: 1600,
     stock: 28,
@@ -92,7 +90,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     slug: "organic-wildflower-honey",
     name: "Organic Wildflower Honey",
     category: "Raw Honey",
-    image: rawHoney01,
+    image: pPure,
     weight: "500g",
     price: 1100,
     stock: 18,
