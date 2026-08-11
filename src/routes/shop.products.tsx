@@ -77,7 +77,7 @@ function ShopCatalog() {
               {category ? category : "All Products"}
             </h1>
             <p className="mt-3 max-w-xl text-muted-foreground">
-              {list.length} {list.length === 1 ? "product" : "products"} · delivery anywhere in Kenya
+              {list.length} {list.length === 1 ? "product" : "products"} · delivery in Marsabit, Isiolo, Meru, Laikipia (Nanyuki) and Nairobi
             </p>
           </div>
           <div className="flex w-full flex-wrap items-center gap-3 md:w-auto">
