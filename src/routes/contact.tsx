@@ -41,7 +41,7 @@ function Contact() {
           <div className="reveal space-y-5">
             {[
               { icon: Phone, t: "Phone", v: "+254 711 856 795", href: "tel:+254711856795" },
-              { icon: Mail, t: "Email", v: "ntarakwai2023@gmail.com", href: "mailto:ntarakwai2023@gmail.com" },
+              { icon: Mail, t: "Email", v: "ntarakwaibeekeeping@gmail.com", href: "mailto:ntarakwaibeekeeping@gmail.com" },
               { icon: MapPin, t: "Address", v: "Mt. Kulal, Kenya" },
               { icon: Clock, t: "Business Hours", v: "Mon – Sat · 8:00 – 18:00 EAT" },
             ].map((c) => (

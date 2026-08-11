@@ -12,7 +12,7 @@ export const BRAND = {
   phone: "+254 711 856 795",
   phoneHref: "tel:+254711856795",
   phoneDisplay: "0711 856 795",
-  email: "ntarakwai2023@gmail.com",
+  email: "ntarakwaibeekeeping@gmail.com",
 } as const;
 
 export const FACTS = [
