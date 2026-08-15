@@ -11,10 +11,17 @@ import mtKulal from "@/assets/mt-kulal.jpg";
 export const Route = createFileRoute("/team")({
   head: () => ({
     meta: [
-      { title: "Our Team — The People Behind Ntarakwai Beekeeping" },
-      { name: "description", content: "Meet the Ntarakwai team: founder Ledany Timothy, apiary supervision, processing and quality control, and marketing — working out of Gatab, Mt. Kulal." },
-      { property: "og:title", content: "Our Team — Ntarakwai Beekeeping" },
-      { property: "og:description", content: "The people producing, protecting and carrying Mt. Kulal honey." },
+      { title: "Our Team: The People Behind Ntarakwai Beekeeping" },
+      {
+        name: "description",
+        content:
+          "Meet the Ntarakwai team: founder Ledany Timothy, apiary supervision, processing and quality control, and marketing, working out of Gatab, Mt. Kulal.",
+      },
+      { property: "og:title", content: "Our Team: Ntarakwai Beekeeping" },
+      {
+        property: "og:description",
+        content: "The people producing, protecting and carrying Mt. Kulal honey.",
+      },
       { property: "og:type", content: "article" },
       { property: "og:image", content: beekeeper },
       { name: "twitter:image", content: beekeeper },
@@ -34,7 +41,11 @@ function Team() {
       <PageHero
         eyebrow="Our Team"
         image={beekeeper}
-        title={<>Five people, one mountain, a very <em className="text-honey">clear</em> job.</>}
+        title={
+          <>
+            Five people, one mountain, a very <em className="text-honey">clear</em> job.
+          </>
+        }
         subtitle="Ntarakwai is run from Gatab by a small team who live where the honey is made."
       />
 
@@ -42,7 +53,11 @@ function Team() {
         <div className="container-luxe">
           <SectionHead
             eyebrow="Leadership"
-            title={<>The people <em className="text-honey-deep">behind the jar</em>.</>}
+            title={
+              <>
+                The people <em className="text-honey-deep">behind the jar</em>.
+              </>
+            }
             intro="Transparency is one of our core values, so we would rather you knew exactly who is responsible for what."
           />
 
@@ -59,7 +74,9 @@ function Team() {
                   </span>
                   <div>
                     <h3 className="font-display text-2xl leading-tight text-charcoal">{m.name}</h3>
-                    <div className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-honey-deep">{m.role}</div>
+                    <div className="mt-1 text-sm font-semibold uppercase tracking-[0.16em] text-honey-deep">
+                      {m.role}
+                    </div>
                     <div className="mt-1 text-sm text-muted-foreground">{m.expertise}</div>
                   </div>
                 </div>
@@ -76,15 +93,24 @@ function Team() {
                 </ul>
 
                 <div className="mt-7 flex flex-wrap gap-2 border-t border-border pt-6">
-                  <a href={`mailto:${BRAND.email}`} className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary">
+                  <a
+                    href={`mailto:${BRAND.email}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary"
+                  >
                     <Mail className="h-3.5 w-3.5" /> Email
                   </a>
                   {m.phone ? (
-                    <a href={m.phoneHref} className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary">
+                    <a
+                      href={m.phoneHref}
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary"
+                    >
                       <Phone className="h-3.5 w-3.5" /> {m.phone}
                     </a>
                   ) : (
-                    <a href={BRAND.phoneHref} className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary">
+                    <a
+                      href={BRAND.phoneHref}
+                      className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/60 px-4 py-2 text-xs font-semibold text-charcoal transition-colors hover:bg-secondary"
+                    >
                       <Phone className="h-3.5 w-3.5" /> {BRAND.phoneDisplay}
                     </a>
                   )}
@@ -98,15 +124,22 @@ function Team() {
       <section className="bg-secondary/50 py-24">
         <div className="container-luxe grid gap-12 lg:grid-cols-[1fr_1.2fr] lg:items-center">
           <div className="reveal-slow overflow-hidden rounded-[2.5rem] shadow-[var(--shadow-luxe)]">
-            <img src={mtKulal} alt="The ridge of Mt. Kulal above the plains" className="h-full w-full object-cover" loading="lazy" width={1920} height={1088} />
+            <img
+              src={mtKulal}
+              alt="The ridge of Mt. Kulal above the plains"
+              className="h-full w-full object-cover"
+              loading="lazy"
+              width={1920}
+              height={1088}
+            />
           </div>
           <div className="reveal-slow">
             <h2 className="font-display text-4xl leading-[1.07] text-charcoal md:text-5xl">
               And the hands that keep the shop <em className="text-honey-deep">running</em>.
             </h2>
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              Beyond the leadership team, day-to-day operations at Gatab are supported by staff whose work rarely
-              gets named but shows up in every jar.
+              Beyond the leadership team, day-to-day operations at Gatab are supported by staff
+              whose work rarely gets named but shows up in every jar.
             </p>
             <ul className="mt-8 space-y-4">
               {SUPPORT_ROLES.map((r) => (
@@ -117,8 +150,8 @@ function Team() {
               ))}
             </ul>
             <p className="mt-8 text-sm leading-relaxed text-muted-foreground">
-              As production grows, so does the team — creating employment for young people across Loiyangalani
-              Ward is one of the reasons {BRAND.legalName} exists.
+              As production grows, so does the team, creating employment for young people across
+              Loiyangalani Ward is one of the reasons {BRAND.legalName} exists.
             </p>
           </div>
         </div>
@@ -129,7 +162,9 @@ function Team() {
           <h2 className="font-display max-w-2xl text-3xl leading-tight md:text-4xl">
             Want to work with us, supply us, or partner with us?
           </h2>
-          <Link to="/contact" className="btn-honey">Get in touch <ArrowRight className="h-4 w-4" /></Link>
+          <Link to="/contact" className="btn-honey">
+            Get in touch <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
     </>

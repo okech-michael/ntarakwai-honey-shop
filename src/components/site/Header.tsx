@@ -30,7 +30,9 @@ const NAV = [
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [activeDesktopDropdown, setActiveDesktopDropdown] = useState<"story" | "impact" | null>(null);
+  const [activeDesktopDropdown, setActiveDesktopDropdown] = useState<"story" | "impact" | null>(
+    null,
+  );
   const [activeMobileDropdown, setActiveMobileDropdown] = useState<"story" | "impact" | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
   const { count } = useCart();
@@ -97,7 +99,8 @@ export function Header() {
               );
             }
 
-            const isOpen = activeDesktopDropdown === (item.label === "Our Story" ? "story" : "impact");
+            const isOpen =
+              activeDesktopDropdown === (item.label === "Our Story" ? "story" : "impact");
 
             return (
               <div key={item.label} className="relative">
@@ -116,7 +119,9 @@ export function Header() {
                   className="flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-charcoal xl:px-4"
                 >
                   <span>{item.label}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
 
                 {isOpen && (
@@ -201,7 +206,8 @@ export function Header() {
                   );
                 }
 
-                const isOpen = activeMobileDropdown === (item.label === "Our Story" ? "story" : "impact");
+                const isOpen =
+                  activeMobileDropdown === (item.label === "Our Story" ? "story" : "impact");
 
                 return (
                   <div key={item.label} className="rounded-xl border border-border bg-card">
@@ -219,7 +225,9 @@ export function Header() {
                       className="flex w-full items-center justify-between px-4 py-3 text-left text-base font-medium text-foreground/80"
                     >
                       <span>{item.label}</span>
-                      <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                      />
                     </button>
                     {isOpen && (
                       <div className="border-t border-border px-2 pb-2 pt-1">

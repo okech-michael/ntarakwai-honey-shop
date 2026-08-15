@@ -18,22 +18,24 @@ async function getServerEntry() {
 
 function getContentType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
-  return {
-    ".js": "application/javascript",
-    ".mjs": "application/javascript",
-    ".css": "text/css",
-    ".json": "application/json",
-    ".svg": "image/svg+xml",
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".webp": "image/webp",
-    ".woff2": "font/woff2",
-    ".woff": "font/woff",
-    ".ttf": "font/ttf",
-    ".ico": "image/x-icon",
-    ".xml": "application/xml",
-  }[ext] ?? "application/octet-stream";
+  return (
+    {
+      ".js": "application/javascript",
+      ".mjs": "application/javascript",
+      ".css": "text/css",
+      ".json": "application/json",
+      ".svg": "image/svg+xml",
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".webp": "image/webp",
+      ".woff2": "font/woff2",
+      ".woff": "font/woff",
+      ".ttf": "font/ttf",
+      ".ico": "image/x-icon",
+      ".xml": "application/xml",
+    }[ext] ?? "application/octet-stream"
+  );
 }
 
 async function serveStaticFile(requestPath, response) {

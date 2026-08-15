@@ -78,15 +78,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ntarakwai Beekeeping Limited — Premium Honey & Bee Products" },
-      { name: "description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
+      { title: "Ntarakwai Beekeeping Limited: Premium Honey & Bee Products" },
+      {
+        name: "description",
+        content:
+          "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply.",
+      },
       { name: "author", content: "Ntarakwai Beekeeping Limited" },
-      { property: "og:title", content: "Ntarakwai Beekeeping Limited — Premium Honey & Bee Products" },
-      { property: "og:description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
+      {
+        property: "og:title",
+        content: "Ntarakwai Beekeeping Limited: Premium Honey & Bee Products",
+      },
+      {
+        property: "og:description",
+        content:
+          "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Ntarakwai Beekeeping Limited — Premium Honey & Bee Products" },
-      { name: "twitter:description", content: "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply." },
+      {
+        name: "twitter:title",
+        content: "Ntarakwai Beekeeping Limited: Premium Honey & Bee Products",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Pure natural honey, beeswax, propolis and bee pollen from trusted Kenyan beekeepers. Wholesale and retail supply.",
+      },
       { property: "og:image", content: logo },
       { name: "twitter:image", content: logo },
     ],
