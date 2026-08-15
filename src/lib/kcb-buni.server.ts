@@ -67,7 +67,8 @@ export async function getKcbBuniAccessToken(): Promise<string | null> {
     });
 
     if (!response.ok) {
-      console.warn("KCB Buni auth returned status", response.status);
+      const errText = await response.text();
+      console.warn(`KCB Buni auth returned status ${response.status}:`, errText);
       return null;
     }
 

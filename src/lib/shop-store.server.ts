@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import path from "path";
+import os from "os";
 import { fileURLToPath } from "url";
 import { SHOP_PRODUCTS, type ShopProduct, type ShopReview } from "./products";
 import { initiateKcbMpesaPush, initiateKcbCardPayment, type KcbCallbackPayload } from "./kcb-buni.server";
@@ -60,7 +61,12 @@ interface MpesaCallbackPayload {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dataFilePath = path.resolve(process.cwd(), "data", "shop-state.json");
+const isVercel = Boolean(process.env.VERCEL);
+const dataFilePath = isVercel
+  ? path.resolve(os.tmpdir(), "shop-state.json")
+  : path.resolve(process.cwd(), "data", "shop-state.json");
+
+let inMemoryState: ShopState | null = null;
 
 function createDefaultState(): ShopState {
   return {
@@ -72,24 +78,32 @@ function createDefaultState(): ShopState {
 }
 
 async function readState(): Promise<ShopState> {
+  if (inMemoryState) return inMemoryState;
   try {
     await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
     const raw = await fs.readFile(dataFilePath, "utf8");
     const parsed = JSON.parse(raw) as ShopState;
-    return {
+    inMemoryState = {
       products: parsed.products ?? {},
       orders: parsed.orders ?? [],
     };
+    return inMemoryState;
   } catch {
     const defaultState = createDefaultState();
-    await writeState(defaultState);
+    inMemoryState = defaultState;
+    void writeState(defaultState);
     return defaultState;
   }
 }
 
 async function writeState(state: ShopState): Promise<void> {
-  await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
-  await fs.writeFile(dataFilePath, JSON.stringify(state, null, 2), "utf8");
+  inMemoryState = state;
+  try {
+    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+    await fs.writeFile(dataFilePath, JSON.stringify(state, null, 2), "utf8");
+  } catch (error) {
+    console.warn("Could not persist shop state to filesystem:", error);
+  }
 }
 
 function buildProductWithState(product: ShopProduct, entry: ProductStateEntry | undefined): ShopProduct {
