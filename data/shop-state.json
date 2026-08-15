@@ -1,7 +1,7 @@
 {
   "products": {
     "raw-500": {
-      "stock": 41,
+      "stock": 39,
       "reviews": [
         {
           "id": "review-1782397649362",
@@ -44,6 +44,10 @@
     "gift-luxe": {
       "stock": 8,
       "reviews": []
+    },
+    "ntara-honey": {
+      "stock": 14,
+      "reviews": []
     }
   },
   "orders": [
@@ -73,6 +77,116 @@
       "checkoutRequestID": "local-1782397686106",
       "merchantRequestID": "local-1782397686107",
       "paidAt": "2026-06-25T14:28:46.513Z"
+    },
+    {
+      "id": "HF97521402",
+      "items": [
+        {
+          "productId": "ntara-honey",
+          "qty": 1,
+          "unitPrice": 950,
+          "lineTotal": 950
+        }
+      ],
+      "customer": {
+        "fullName": "Erick Mwangi",
+        "phone": "0113242983",
+        "email": "rickmwasswiz@gmail.com",
+        "county": "Nairobi",
+        "town": "Nakuru",
+        "landmark": "sdfgh",
+        "address": "Nakuru-Nairobi Highway"
+      },
+      "paymentMethod": "mpesa",
+      "amount": 1200,
+      "paymentStatus": "pending",
+      "createdAt": "2026-08-15T12:38:41.402Z",
+      "checkoutRequestID": "local-1786797521434",
+      "merchantRequestID": "local-1786797521434"
+    },
+    {
+      "id": "HF99377782",
+      "items": [
+        {
+          "productId": "raw-500",
+          "qty": 2,
+          "unitPrice": 850,
+          "lineTotal": 1700
+        },
+        {
+          "productId": "ntara-honey",
+          "qty": 1,
+          "unitPrice": 950,
+          "lineTotal": 950
+        }
+      ],
+      "customer": {
+        "fullName": "Erick Mwangi",
+        "phone": "0113242983",
+        "email": "rickmwasswiz@gmail.com",
+        "county": "Nairobi",
+        "town": "Nakuru",
+        "landmark": "ASDFCGB ",
+        "address": "Nakuru-Nairobi Highway"
+      },
+      "paymentMethod": "kcb_mpesa",
+      "amount": 2900,
+      "paymentStatus": "initiated",
+      "createdAt": "2026-08-15T13:09:37.872Z",
+      "checkoutRequestID": "KCB-1786799378054-664",
+      "merchantRequestID": "KCB-MCH-1786799378057"
+    },
+    {
+      "id": "HF00529802",
+      "items": [
+        {
+          "productId": "ntara-honey",
+          "qty": 2,
+          "unitPrice": 950,
+          "lineTotal": 1900
+        }
+      ],
+      "customer": {
+        "fullName": "Erick Mwangi",
+        "phone": "0113242983",
+        "email": "rickmwasswiz@gmail.com",
+        "county": "Nairobi",
+        "town": "Nakuru",
+        "landmark": "SDFGHBNM",
+        "address": "Nakuru-Nairobi Highway"
+      },
+      "paymentMethod": "card",
+      "amount": 2150,
+      "paymentStatus": "initiated",
+      "createdAt": "2026-08-15T13:28:49.806Z",
+      "checkoutRequestID": "KCB-CARD-1786800529888",
+      "redirectUrl": "/shop/checkout/success?order=HF00529802&method=kcb_card"
+    },
+    {
+      "id": "HF00596402",
+      "items": [
+        {
+          "productId": "ntara-honey",
+          "qty": 2,
+          "unitPrice": 950,
+          "lineTotal": 1900
+        }
+      ],
+      "customer": {
+        "fullName": "Erick Mwangi",
+        "phone": "0113242983",
+        "email": "rickmwasswiz@gmail.com",
+        "county": "Nairobi",
+        "town": "Nakuru",
+        "landmark": "WESDRGYHJ",
+        "address": "Nakuru-Nairobi Highway"
+      },
+      "paymentMethod": "mpesa",
+      "amount": 2150,
+      "paymentStatus": "initiated",
+      "createdAt": "2026-08-15T13:29:56.402Z",
+      "checkoutRequestID": "KCB-1786800596794-284",
+      "merchantRequestID": "KCB-MCH-1786800596798"
     }
   ]
 }

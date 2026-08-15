@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { SHOP_PRODUCTS, type ShopProduct, type ShopReview } from "./products";
+import { initiateKcbMpesaPush, initiateKcbCardPayment, type KcbCallbackPayload } from "./kcb-buni.server";
 
 export interface ShopReviewInput {
   name: string;
@@ -24,11 +25,12 @@ export interface CheckoutOrder {
   id: string;
   items: Array<{ productId: string; qty: number; unitPrice: number; lineTotal: number }>;
   customer: Record<string, string>;
-  paymentMethod: "mpesa" | "bank";
+  paymentMethod: "mpesa" | "card" | "bank";
   amount: number;
   paymentStatus: "pending" | "initiated" | "paid" | "failed";
   checkoutRequestID?: string;
   merchantRequestID?: string;
+  redirectUrl?: string;
   createdAt: string;
   paidAt?: string;
 }
@@ -36,7 +38,7 @@ export interface CheckoutOrder {
 interface CheckoutPayload {
   items: Array<{ productId: string; qty: number }>;
   customer: Record<string, string>;
-  paymentMethod: "mpesa" | "bank";
+  paymentMethod: "mpesa" | "card" | "bank";
   phone?: string;
   amount: number;
 }
@@ -136,7 +138,7 @@ export async function addProductReview(slug: string, input: ShopReviewInput): Pr
   return buildProductWithState(product, entry);
 }
 
-export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: boolean; orderNumber: string; paymentStatus: string; paymentMessage: string; checkoutRequestID?: string }> {
+export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: boolean; orderNumber: string; paymentStatus: string; paymentMessage: string; checkoutRequestID?: string; redirectUrl?: string }> {
   const state = await readState();
 
   const orderItems = [] as CheckoutOrder["items"];
@@ -173,15 +175,42 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: b
     createdAt: new Date().toISOString(),
   };
 
+  let kcbRedirectUrl: string | undefined;
+
   if (payload.paymentMethod === "mpesa") {
-    const mpesaResult = await initiateMpesaPayment({
+    const targetPhone = payload.phone ?? payload.customer.phone ?? "";
+    const kcbResult = await initiateKcbMpesaPush({
       amount: payload.amount,
-      phone: payload.phone ?? payload.customer.phone ?? "",
+      phone: targetPhone,
       orderNumber,
     });
-    order.paymentStatus = mpesaResult.ok ? "initiated" : "pending";
-    order.checkoutRequestID = mpesaResult.checkoutRequestID;
-    order.merchantRequestID = mpesaResult.merchantRequestID;
+
+    if (kcbResult.ok) {
+      order.paymentStatus = "initiated";
+      order.checkoutRequestID = kcbResult.checkoutRequestID;
+      order.merchantRequestID = kcbResult.merchantRequestID;
+    } else {
+      console.warn("Primary M-PESA provider failed, falling back to Daraja:", kcbResult.message);
+      const mpesaResult = await initiateMpesaPayment({
+        amount: payload.amount,
+        phone: targetPhone,
+        orderNumber,
+      });
+      order.paymentStatus = mpesaResult.ok ? "initiated" : "pending";
+      order.checkoutRequestID = mpesaResult.checkoutRequestID;
+      order.merchantRequestID = mpesaResult.merchantRequestID;
+    }
+  } else if (payload.paymentMethod === "card") {
+    const cardResult = await initiateKcbCardPayment({
+      amount: payload.amount,
+      orderNumber,
+      customerEmail: payload.customer.email ?? "",
+      customerName: payload.customer.fullName ?? "",
+    });
+    order.paymentStatus = cardResult.ok ? "initiated" : "pending";
+    order.checkoutRequestID = cardResult.checkoutRequestID;
+    order.redirectUrl = cardResult.redirectUrl;
+    kcbRedirectUrl = cardResult.redirectUrl;
   }
 
   state.orders.push(order);
@@ -192,9 +221,12 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: b
     orderNumber,
     paymentStatus: order.paymentStatus,
     paymentMessage: payload.paymentMethod === "mpesa"
-      ? "Your M-Pesa STK push request has been sent. Please complete the prompt on your phone."
+      ? "An M-PESA STK push prompt has been sent to your phone. Please enter your PIN to complete payment."
+      : payload.paymentMethod === "card"
+      ? "Initializing secure card payment portal..."
       : "Your bank transfer request has been received and is awaiting confirmation.",
     checkoutRequestID: order.checkoutRequestID,
+    redirectUrl: kcbRedirectUrl,
   };
 }
 
@@ -307,6 +339,45 @@ function normalizePhone(input: string): string {
   return `254${digits}`;
 }
 
+export async function handleKcbCallback(payload: KcbCallbackPayload): Promise<{ ok: boolean; message: string }> {
+  const state = await readState();
+  const callback = payload.Body?.stkCallback ?? payload;
+  const checkoutRequestID = callback.CheckoutRequestID ?? payload.CheckoutRequestID;
+  const merchantRequestID = callback.MerchantRequestID ?? payload.MerchantRequestID;
+  const orderNumber = payload.OrderNumber;
+
+  const order = state.orders.find(
+    (entry) =>
+      (checkoutRequestID && entry.checkoutRequestID === checkoutRequestID) ||
+      (merchantRequestID && entry.merchantRequestID === merchantRequestID) ||
+      (orderNumber && entry.id === orderNumber)
+  );
+
+  if (!order) {
+    return { ok: false, message: "Order not found for KCB callback." };
+  }
+
+  const resultCode = callback.ResultCode ?? payload.ResultCode ?? 0;
+  const isSuccessful = resultCode === 0 || payload.Status === "SUCCESS" || payload.Status === "PAID";
+
+  if (isSuccessful) {
+    order.paymentStatus = "paid";
+    order.paidAt = new Date().toISOString();
+  } else {
+    order.paymentStatus = "failed";
+    for (const item of order.items) {
+      const product = SHOP_PRODUCTS.find((entry) => entry.id === item.productId);
+      if (!product) continue;
+      const stockEntry = state.products[product.id] ?? { stock: product.stock, reviews: [] };
+      stockEntry.stock += item.qty;
+      state.products[product.id] = stockEntry;
+    }
+  }
+
+  await writeState(state);
+  return { ok: true, message: order.paymentStatus === "paid" ? "KCB Payment confirmed." : "KCB Payment failed; stock restored." };
+}
+
 export async function handleShopApiRequest(pathname: string, request: Request): Promise<Response | null> {
   if (pathname === "/api/products" && request.method === "GET") {
     const products = await getCatalogProducts();
@@ -361,6 +432,12 @@ export async function handleShopApiRequest(pathname: string, request: Request): 
   if (pathname === "/api/mpesa/callback" && request.method === "POST") {
     const payload = (await request.json()) as MpesaCallbackPayload;
     const result = await handleMpesaCallback(payload);
+    return Response.json(result, { status: 200 });
+  }
+
+  if (pathname === "/api/kcb/callback" && request.method === "POST") {
+    const payload = (await request.json()) as KcbCallbackPayload;
+    const result = await handleKcbCallback(payload);
     return Response.json(result, { status: 200 });
   }
 
