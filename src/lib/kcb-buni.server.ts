@@ -89,16 +89,17 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
 
   const token = await getKcbBuniAccessToken();
 
-  // If no credentials or token available, return sandbox simulation mode response
-  if (!token || !passKey) {
-    console.info("KCB Buni credentials incomplete. Running in sandbox simulation mode.");
-    const mockCheckoutID = `KCB-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const mockMerchantID = `KCB-MCH-${Date.now()}`;
+  if (!token) {
     return {
-      ok: true,
-      checkoutRequestID: mockCheckoutID,
-      merchantRequestID: mockMerchantID,
-      message: "KCB Buni M-PESA STK push initiated successfully (Sandbox Mode). Please respond on your phone.",
+      ok: false,
+      message: "KCB Buni authentication failed. Please verify KCB_BUNI_APP_KEY and KCB_BUNI_APP_SECRET in environment variables.",
+    };
+  }
+
+  if (!passKey) {
+    return {
+      ok: false,
+      message: "KCB Buni passkey is missing. Please configure KCB_BUNI_PASSKEY in environment variables.",
     };
   }
 
@@ -129,7 +130,10 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
 
     const bodyText = await response.text();
     if (!response.ok) {
-      throw new Error(`KCB Buni STK push failed with status ${response.status}: ${bodyText}`);
+      return {
+        ok: false,
+        message: `KCB Buni STK Push rejected (${response.status}): ${bodyText}`,
+      };
     }
 
     const data = JSON.parse(bodyText) as { CheckoutRequestID?: string; MerchantRequestID?: string; ResponseDescription?: string };
@@ -156,13 +160,9 @@ export async function initiateKcbCardPayment({ amount, orderNumber, customerEmai
   const token = await getKcbBuniAccessToken();
 
   if (!token) {
-    console.info("KCB Buni credentials incomplete. Running Card Payment in sandbox mode.");
-    const mockCheckoutID = `KCB-CARD-${Date.now()}`;
     return {
-      ok: true,
-      checkoutRequestID: mockCheckoutID,
-      redirectUrl: `/shop/checkout/success?order=${orderNumber}&method=kcb_card`,
-      message: "KCB Buni Card Payment gateway initialized (Sandbox Mode).",
+      ok: false,
+      message: "KCB Buni authentication failed. Please verify KCB_BUNI_APP_KEY and KCB_BUNI_APP_SECRET in environment variables.",
     };
   }
 
@@ -187,7 +187,10 @@ export async function initiateKcbCardPayment({ amount, orderNumber, customerEmai
 
     const bodyText = await response.text();
     if (!response.ok) {
-      throw new Error(`KCB Buni Card Checkout failed: ${bodyText}`);
+      return {
+        ok: false,
+        message: `KCB Buni Card Gateway error (${response.status}): ${bodyText}`,
+      };
     }
 
     const data = JSON.parse(bodyText) as { CheckoutRequestID?: string; PaymentUrl?: string; Message?: string };
