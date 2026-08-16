@@ -12,7 +12,7 @@ export const Route = createFileRoute("/shop/checkout/success")({
   validateSearch: search,
   head: () => ({
     meta: [
-      { title: "Order Confirmed — Ntarakwai Shop" },
+      { title: "Order Confirmed: Ntarakwai Shop" },
       { name: "description", content: "Your honey order has been received." },
       { name: "robots", content: "noindex" },
     ],
@@ -35,7 +35,9 @@ function Success() {
       if (response.ok) {
         const data = await response.json();
         const nextStatus = data?.order?.paymentStatus ?? "pending";
-        setPaymentStatus(nextStatus === "paid" ? "paid" : nextStatus === "failed" ? "failed" : "pending");
+        setPaymentStatus(
+          nextStatus === "paid" ? "paid" : nextStatus === "failed" ? "failed" : "pending",
+        );
       }
     };
 
@@ -56,6 +58,11 @@ function Success() {
               <Check className="h-9 w-9" strokeWidth={3} />
             </div>
             <h1 className="font-display mt-7 text-4xl text-charcoal md:text-5xl">
+              {isMpesa && paymentStatus === "paid"
+                ? "Payment received!"
+                : isMpesa
+                  ? "Payment pending"
+                  : "Order received!"}
               {isAutoChecking && paymentStatus === "paid" ? "Payment received!" : isAutoChecking ? "Payment pending" : "Order received!"}
             </h1>
             <p className="mt-4 text-base text-muted-foreground">
@@ -68,20 +75,34 @@ function Success() {
 
             {order && (
               <div className="mx-auto mt-8 inline-flex items-center gap-3 rounded-full border border-border bg-secondary/60 px-5 py-3">
-                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Order #</span>
+                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  Order #
+                </span>
                 <span className="font-display text-lg text-honey-deep">{order}</span>
               </div>
             )}
 
             <div className="mt-10 grid gap-4 text-left sm:grid-cols-3">
-              <Card icon={<Mail className="h-5 w-5" />} t="Confirmation sent" s="Check your inbox for the order receipt." />
-              <Card icon={<Truck className="h-5 w-5" />} t="Via Wells Fargo or your preferred parcel courier" s="Tracking number will follow shortly." />
+              <Card
+                icon={<Mail className="h-5 w-5" />}
+                t="Confirmation sent"
+                s="Check your inbox for the order receipt."
+              />
+              <Card
+                icon={<Truck className="h-5 w-5" />}
+                t="Via Wells Fargo or your preferred parcel courier"
+                s="Tracking number will follow shortly."
+              />
               <Card icon={<Phone className="h-5 w-5" />} t="Need help?" s="Call +254 711 856 795" />
             </div>
 
             <div className="mt-10 flex flex-wrap justify-center gap-3">
-              <Link to="/shop/products" className="btn-honey"><ShoppingBag className="h-4 w-4" /> Continue shopping</Link>
-              <Link to="/" className="btn-outline-honey">Back to home</Link>
+              <Link to="/shop/products" className="btn-honey">
+                <ShoppingBag className="h-4 w-4" /> Continue shopping
+              </Link>
+              <Link to="/" className="btn-outline-honey">
+                Back to home
+              </Link>
             </div>
           </div>
         </div>
@@ -93,7 +114,9 @@ function Success() {
 function Card({ icon, t, s }: { icon: React.ReactNode; t: string; s: string }) {
   return (
     <div className="rounded-2xl border border-border bg-background p-5">
-      <span className="grid h-10 w-10 place-items-center rounded-xl bg-honey/20 text-honey-deep">{icon}</span>
+      <span className="grid h-10 w-10 place-items-center rounded-xl bg-honey/20 text-honey-deep">
+        {icon}
+      </span>
       <div className="mt-3 font-display text-base text-charcoal">{t}</div>
       <div className="mt-1 text-xs text-muted-foreground">{s}</div>
     </div>

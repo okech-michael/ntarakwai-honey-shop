@@ -6,12 +6,7 @@ import pPropolis from "@/assets/product-propolis.jpg";
 import pPollen from "@/assets/product-pollen.jpg";
 import pGift from "@/assets/product-gift.jpg";
 
-export type ShopCategory =
-  | "Raw Honey"
-  | "Beeswax"
-  | "Propolis"
-  | "Bee Pollen"
-  | "Gift Packages";
+export type ShopCategory = "Raw Honey" | "Beeswax" | "Propolis" | "Bee Pollen" | "Gift Packages";
 
 export interface ShopReview {
   id: string;
@@ -68,13 +63,13 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     badge: "Bestseller",
     shortDesc: "Cold-extracted, unprocessed honey with full enzymatic richness.",
     description:
-      "Harvested by hand from highland apiaries and cold-extracted to preserve every enzyme, aroma and antioxidant. Unfiltered, unheated and unblended — pure honey, exactly as the bees made it.",
+      "Harvested by hand from highland apiaries and cold-extracted to preserve every enzyme, aroma and antioxidant. Unfiltered, unheated and unblended: pure honey, exactly as the bees made it.",
     benefits: ["Natural energy", "Immunity support", "Rich floral flavour", "Antioxidant-rich"],
   },
   {
     id: "raw-1kg",
     slug: "pure-raw-honey-1kg",
-    name: "Pure Raw Honey — Family Jar",
+    name: "Pure Raw Honey - Family Jar",
     category: "Raw Honey",
     image: pPure,
     weight: "1kg",
@@ -126,7 +121,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     badge: "Artisan",
     shortDesc: "Pure cosmetic-grade beeswax for candles, balms and crafts.",
     description:
-      "Filtered, sun-bleached beeswax in clean pour-ready blocks. Cosmetic and food grade — perfect for candle makers, soap makers and natural skincare formulators.",
+      "Filtered, sun-bleached beeswax in clean pour-ready blocks. Cosmetic and food grade: perfect for candle makers, soap makers and natural skincare formulators.",
     benefits: ["Cosmetic-grade", "Clean burn", "Natural fragrance"],
   },
   {
@@ -154,7 +149,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     price: 1200,
     stock: 15,
     badge: "Superfood",
-    shortDesc: "Sun-dried pollen granules — a complete superfood.",
+    shortDesc: "Sun-dried pollen granules: a complete superfood.",
     description:
       "Carefully collected and gently dried to preserve every nutrient. Sprinkle over yoghurt, smoothies and porridge for a complete protein and vitamin boost.",
     benefits: ["Protein-rich", "Vitamins & minerals", "Energy boost"],
@@ -172,7 +167,7 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     badge: "Gift",
     shortDesc: "Three of our finest honeys in an elegant gift box.",
     description:
-      "A beautifully presented gift trio featuring our raw honey, organic wildflower and processed clear honey — wrapped in a premium cream and gold gift box.",
+      "A beautifully presented gift trio featuring our raw honey, organic wildflower and processed clear honey, wrapped in a premium cream and gold gift box.",
     benefits: ["Premium packaging", "Corporate gifting", "Three varieties"],
   },
   {
@@ -184,9 +179,9 @@ export const SHOP_PRODUCTS: ShopProduct[] = [
     weight: "Curated set",
     price: 3800,
     stock: 8,
-    shortDesc: "Honey, beeswax candle, propolis and pollen — the complete set.",
+    shortDesc: "Honey, beeswax candle, propolis and pollen: the complete set.",
     description:
-      "Our most luxurious gift — the complete bee experience in a single elegant box. Includes raw honey, a hand-poured beeswax candle, propolis tincture and a jar of bee pollen.",
+      "Our most luxurious gift: the complete bee experience in a single elegant box. Includes raw honey, a hand-poured beeswax candle, propolis tincture and a jar of bee pollen.",
     benefits: ["Complete collection", "Hand-poured candle", "Luxury box"],
   },
 ];

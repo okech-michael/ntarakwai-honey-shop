@@ -28,10 +28,14 @@ const IMAGES = [
 export const Route = createFileRoute("/gallery")({
   head: () => ({
     meta: [
-      { title: "Gallery — From hive to home" },
-      { name: "description", content: "A visual journey through our beehives, harvesting process, production and packaging." },
+      { title: "Gallery: From hive to home" },
+      {
+        name: "description",
+        content:
+          "A visual journey through our beehives, harvesting process, production and packaging.",
+      },
       { property: "og:title", content: "Ntarakwai Gallery" },
-      { property: "og:description", content: "From hive to home — explore our craft." },
+      { property: "og:description", content: "From hive to home, explore our craft." },
       { property: "og:image", content: hives },
     ],
   }),
@@ -47,7 +51,11 @@ function Gallery() {
       <PageHero
         eyebrow="Gallery"
         image={hives}
-        title={<>From hive to home — <em className="text-honey">our craft in motion</em>.</>}
+        title={
+          <>
+            From hive to home, <em className="text-honey">our craft in motion</em>.
+          </>
+        }
         subtitle="A glimpse inside the beehives, harvests and quiet moments that shape every jar."
       />
 
@@ -62,7 +70,12 @@ function Gallery() {
                 style={{ transitionDelay: `${i * 40}ms` }}
                 aria-label={`Open ${img.alt}`}
               >
-                <img src={img.src} alt={img.alt} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  loading="lazy"
+                />
                 <span className="absolute inset-0 bg-charcoal/0 transition-colors group-hover:bg-charcoal/30" />
               </button>
             ))}
@@ -71,11 +84,22 @@ function Gallery() {
       </section>
 
       {open && (
-        <div className="fixed inset-0 z-[60] grid place-items-center bg-charcoal/85 p-4 backdrop-blur" onClick={() => setOpen(null)}>
-          <button className="absolute right-4 top-4 grid h-12 w-12 place-items-center rounded-full bg-cream text-charcoal" aria-label="Close" onClick={() => setOpen(null)}>
+        <div
+          className="fixed inset-0 z-[60] grid place-items-center bg-charcoal/85 p-4 backdrop-blur"
+          onClick={() => setOpen(null)}
+        >
+          <button
+            className="absolute right-4 top-4 grid h-12 w-12 place-items-center rounded-full bg-cream text-charcoal"
+            aria-label="Close"
+            onClick={() => setOpen(null)}
+          >
             <X className="h-5 w-5" />
           </button>
-          <img src={open} alt="" className="max-h-[88vh] max-w-[95vw] rounded-2xl shadow-2xl animate-scale-in" />
+          <img
+            src={open}
+            alt=""
+            className="max-h-[88vh] max-w-[95vw] rounded-2xl shadow-2xl animate-scale-in"
+          />
         </div>
       )}
     </>

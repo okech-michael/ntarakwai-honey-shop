@@ -9,7 +9,11 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "Contact Ntarakwai Beekeeping Limited" },
-      { name: "description", content: "Get in touch with Ntarakwai Beekeeping Limited for orders, wholesale enquiries and partnerships. Call 0711856795." },
+      {
+        name: "description",
+        content:
+          "Get in touch with Ntarakwai Beekeeping Limited for orders, wholesale enquiries and partnerships. Call 0711856795.",
+      },
       { property: "og:title", content: "Contact Ntarakwai Beekeeping Limited" },
       { property: "og:description", content: "We'd love to hear from you." },
       { property: "og:image", content: honeycomb },
@@ -27,11 +31,22 @@ function Contact() {
       <PageHero
         eyebrow="Contact"
         image={honeycomb}
-        title={<>Let's talk <em className="text-honey">honey</em>.</>}
+        title={
+          <>
+            Let's talk <em className="text-honey">honey</em>.
+          </>
+        }
         subtitle="Reach out for orders, wholesale enquiries, partnerships or a friendly hello."
       >
-        <a href="tel:+254711856795" className="btn-honey"><Phone className="h-4 w-4" /> Call +254 711 856 795</a>
-        <a href="https://wa.me/254711856795" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-cream/40 px-7 py-[0.95rem] text-sm font-semibold text-cream hover:bg-cream hover:text-charcoal">
+        <a href="tel:+254711856795" className="btn-honey">
+          <Phone className="h-4 w-4" /> Call +254 711 856 795
+        </a>
+        <a
+          href="https://wa.me/254711856795"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-2 rounded-full border border-cream/40 px-7 py-[0.95rem] text-sm font-semibold text-cream hover:bg-cream hover:text-charcoal"
+        >
           <MessageCircle className="h-4 w-4" /> WhatsApp
         </a>
       </PageHero>
@@ -41,14 +56,27 @@ function Contact() {
           <div className="reveal space-y-5">
             {[
               { icon: Phone, t: "Phone", v: "+254 711 856 795", href: "tel:+254711856795" },
-              { icon: Mail, t: "Email", v: "ntarakwaibeekeeping@gmail.com", href: "mailto:ntarakwaibeekeeping@gmail.com" },
+              {
+                icon: Mail,
+                t: "Email",
+                v: "ntarakwaibeekeeping@gmail.com",
+                href: "mailto:ntarakwaibeekeeping@gmail.com",
+              },
               { icon: MapPin, t: "Address", v: "Mt. Kulal, Kenya" },
               { icon: Clock, t: "Business Hours", v: "Mon – Sat · 8:00 – 18:00 EAT" },
             ].map((c) => (
-              <a key={c.t} href={c.href} className="flex items-start gap-4 rounded-3xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5">
-                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-honey/20 text-honey-deep"><c.icon className="h-5 w-5" /></span>
+              <a
+                key={c.t}
+                href={c.href}
+                className="flex items-start gap-4 rounded-3xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5"
+              >
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-honey/20 text-honey-deep">
+                  <c.icon className="h-5 w-5" />
+                </span>
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{c.t}</div>
+                  <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    {c.t}
+                  </div>
                   <div className="font-display mt-1 text-xl text-charcoal">{c.v}</div>
                 </div>
               </a>
@@ -67,20 +95,29 @@ function Contact() {
 
           <form
             className="reveal rounded-3xl border border-border bg-card p-8 shadow-sm"
-            onSubmit={(e) => { e.preventDefault(); setSent(true); }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSent(true);
+            }}
           >
             {sent ? (
               <div className="grid h-full place-items-center py-16 text-center">
                 <div>
-                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-honey/30 text-honey-dark"><Check className="h-6 w-6" /></div>
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-honey/30 text-honey-dark">
+                    <Check className="h-6 w-6" />
+                  </div>
                   <h3 className="font-display mt-5 text-2xl text-charcoal">Message received</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">We'll respond shortly. Asante!</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    We'll respond shortly. Asante!
+                  </p>
                 </div>
               </div>
             ) : (
               <>
                 <h2 className="font-display text-3xl text-charcoal">Send a message</h2>
-                <p className="mt-2 text-sm text-muted-foreground">We typically respond within a few hours during business days.</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  We typically respond within a few hours during business days.
+                </p>
                 <div className="mt-6 grid gap-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Input label="Full name" name="name" />
@@ -90,9 +127,15 @@ function Contact() {
                   <Input label="Subject" name="subject" />
                   <label className="text-sm font-medium text-charcoal">
                     Message
-                    <textarea required rows={5} className="mt-1.5 w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30" />
+                    <textarea
+                      required
+                      rows={5}
+                      className="mt-1.5 w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30"
+                    />
                   </label>
-                  <button type="submit" className="btn-honey w-full">Send message</button>
+                  <button type="submit" className="btn-honey w-full">
+                    Send message
+                  </button>
                 </div>
               </>
             )}
@@ -107,7 +150,12 @@ function Input({ label, name, type = "text" }: { label: string; name: string; ty
   return (
     <label className="text-sm font-medium text-charcoal">
       {label}
-      <input required name={name} type={type} className="mt-1.5 w-full rounded-full border border-input bg-background px-5 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30" />
+      <input
+        required
+        name={name}
+        type={type}
+        className="mt-1.5 w-full rounded-full border border-input bg-background px-5 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30"
+      />
     </label>
   );
 }

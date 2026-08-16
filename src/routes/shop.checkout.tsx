@@ -1,5 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, type FormEvent } from "react";
+import {
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  Smartphone,
+  Landmark,
+  Upload,
+  ShieldCheck,
+  Truck,
+  Loader2,
+} from "lucide-react";
 import { Check, ArrowRight, ArrowLeft, Smartphone, Landmark, Upload, ShieldCheck, Truck, Loader2, CreditCard, Building2 } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
 import { useCart } from "@/lib/cart";
@@ -8,27 +19,29 @@ import { formatKES } from "@/lib/products";
 export const Route = createFileRoute("/shop/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Ntarakwai Shop" },
-      { name: "description", content: "Securely complete your honey order with M-Pesa or bank transfer." },
+      { title: "Checkout: Ntarakwai Shop" },
+      {
+        name: "description",
+        content: "Securely complete your honey order with M-Pesa or bank transfer.",
+      },
     ],
   }),
   component: Checkout,
 });
 
-const DELIVERY_COUNTIES = [
-  "Marsabit",
-  "Isiolo",
-  "Meru",
-  "Laikipia",
-  "Nairobi",
-];
+const DELIVERY_COUNTIES = ["Marsabit", "Isiolo", "Meru", "Laikipia", "Nairobi"];
 
 type Step = 1 | 2 | 3;
 type PayMethod = "mpesa" | "card" | "bank";
 
 interface CustomerInfo {
-  fullName: string; phone: string; email: string;
-  county: string; town: string; landmark: string; address: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  county: string;
+  town: string;
+  landmark: string;
+  address: string;
 }
 
 function Checkout() {
@@ -37,7 +50,13 @@ function Checkout() {
   const { resolved, subtotal, count, clear } = useCart();
   const [step, setStep] = useState<Step>(1);
   const [info, setInfo] = useState<CustomerInfo>({
-    fullName: "", phone: "", email: "", county: "Nairobi", town: "", landmark: "", address: "",
+    fullName: "",
+    phone: "",
+    email: "",
+    county: "Nairobi",
+    town: "",
+    landmark: "",
+    address: "",
   });
   const [payMethod, setPayMethod] = useState<PayMethod>("mpesa");
   const [mpesaPhone, setMpesaPhone] = useState("");
@@ -62,7 +81,9 @@ function Checkout() {
       <div className="bg-background pt-32 pb-20">
         <div className="container-luxe mx-auto max-w-md text-center">
           <h1 className="font-display text-3xl text-charcoal">Your cart is empty</h1>
-          <Link to="/shop/products" className="btn-honey mt-6 inline-flex">Browse products</Link>
+          <Link to="/shop/products" className="btn-honey mt-6 inline-flex">
+            Browse products
+          </Link>
         </div>
       </div>
     );
@@ -72,7 +93,9 @@ function Checkout() {
     e.preventDefault();
 
     if (!DELIVERY_COUNTIES.includes(info.county)) {
-      setError("We currently deliver only within Marsabit, Isiolo, Meru, Laikipia (Nanyuki), and Nairobi.");
+      setError(
+        "We currently deliver only within Marsabit, Isiolo, Meru, Laikipia (Nanyuki), and Nairobi.",
+      );
       return;
     }
 
@@ -143,13 +166,21 @@ function Checkout() {
               { n: 3, label: "Payment" },
             ].map((s, i) => (
               <div key={s.n} className="flex flex-1 items-center">
-                <div className={`flex items-center gap-3 ${step >= s.n ? "text-charcoal" : "text-muted-foreground"}`}>
-                  <span className={`grid h-9 w-9 place-items-center rounded-full text-sm font-semibold transition-colors ${step > s.n ? "bg-honey-deep text-cream" : step === s.n ? "bg-charcoal text-cream" : "bg-secondary text-muted-foreground"}`}>
+                <div
+                  className={`flex items-center gap-3 ${step >= s.n ? "text-charcoal" : "text-muted-foreground"}`}
+                >
+                  <span
+                    className={`grid h-9 w-9 place-items-center rounded-full text-sm font-semibold transition-colors ${step > s.n ? "bg-honey-deep text-cream" : step === s.n ? "bg-charcoal text-cream" : "bg-secondary text-muted-foreground"}`}
+                  >
                     {step > s.n ? <Check className="h-4 w-4" /> : s.n}
                   </span>
                   <span className="hidden text-sm font-medium sm:inline">{s.label}</span>
                 </div>
-                {i < 2 && <div className={`mx-3 h-px flex-1 ${step > s.n ? "bg-honey-deep" : "bg-border"}`} />}
+                {i < 2 && (
+                  <div
+                    className={`mx-3 h-px flex-1 ${step > s.n ? "bg-honey-deep" : "bg-border"}`}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -159,16 +190,43 @@ function Checkout() {
           {/* Main */}
           <div className="reveal">
             {step === 1 && (
-              <form onSubmit={handleStep1} className="rounded-3xl border border-border bg-card p-7 shadow-sm md:p-9">
+              <form
+                onSubmit={handleStep1}
+                className="rounded-3xl border border-border bg-card p-7 shadow-sm md:p-9"
+              >
                 <h2 className="font-display text-3xl text-charcoal">Customer information</h2>
-                <p className="mt-2 text-sm text-muted-foreground">Where should we deliver your honey?</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Where should we deliver your honey?
+                </p>
 
                 <div className="mt-7 grid gap-5">
-                  {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-                  <Field label="Full Name" value={info.fullName} onChange={(v) => setInfo({ ...info, fullName: v })} required />
+                  {error && (
+                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {error}
+                    </div>
+                  )}
+                  <Field
+                    label="Full Name"
+                    value={info.fullName}
+                    onChange={(v) => setInfo({ ...info, fullName: v })}
+                    required
+                  />
                   <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label="Phone Number" type="tel" placeholder="07XX XXX XXX" value={info.phone} onChange={(v) => setInfo({ ...info, phone: v })} required />
-                    <Field label="Email" type="email" value={info.email} onChange={(v) => setInfo({ ...info, email: v })} required />
+                    <Field
+                      label="Phone Number"
+                      type="tel"
+                      placeholder="07XX XXX XXX"
+                      value={info.phone}
+                      onChange={(v) => setInfo({ ...info, phone: v })}
+                      required
+                    />
+                    <Field
+                      label="Email"
+                      type="email"
+                      value={info.email}
+                      onChange={(v) => setInfo({ ...info, email: v })}
+                      required
+                    />
                   </div>
                   <div className="grid gap-5 sm:grid-cols-2">
                     <label className="text-sm font-medium text-charcoal">
@@ -178,16 +236,32 @@ function Checkout() {
                         onChange={(e) => setInfo({ ...info, county: e.target.value })}
                         className="mt-1.5 w-full rounded-full border border-input bg-background px-5 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30"
                       >
-                        {DELIVERY_COUNTIES.map((c) => <option key={c}>{c}</option>)}
+                        {DELIVERY_COUNTIES.map((c) => (
+                          <option key={c}>{c}</option>
+                        ))}
                       </select>
                     </label>
-                    <Field label="Town" placeholder={info.county === "Laikipia" ? "Nanyuki" : "Town or area"} value={info.town} onChange={(v) => setInfo({ ...info, town: v })} required />
+                    <Field
+                      label="Town"
+                      placeholder={info.county === "Laikipia" ? "Nanyuki" : "Town or area"}
+                      value={info.town}
+                      onChange={(v) => setInfo({ ...info, town: v })}
+                      required
+                    />
                   </div>
-                  <Field label="Nearest Landmark" value={info.landmark} onChange={(v) => setInfo({ ...info, landmark: v })} placeholder="e.g. Junction Mall" required />
+                  <Field
+                    label="Nearest Landmark"
+                    value={info.landmark}
+                    onChange={(v) => setInfo({ ...info, landmark: v })}
+                    placeholder="e.g. Junction Mall"
+                    required
+                  />
                   <label className="text-sm font-medium text-charcoal">
                     Delivery Address
                     <textarea
-                      required value={info.address} onChange={(e) => setInfo({ ...info, address: e.target.value })}
+                      required
+                      value={info.address}
+                      onChange={(e) => setInfo({ ...info, address: e.target.value })}
                       rows={3}
                       className="mt-1.5 w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30"
                     />
@@ -203,15 +277,25 @@ function Checkout() {
             {step === 2 && (
               <div className="rounded-3xl border border-border bg-card p-7 shadow-sm md:p-9">
                 <h2 className="font-display text-3xl text-charcoal">Review your order</h2>
-                <p className="mt-2 text-sm text-muted-foreground">Confirm your products and delivery details.</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Confirm your products and delivery details.
+                </p>
 
                 <div className="mt-7 divide-y divide-border rounded-2xl border border-border bg-background">
                   {resolved.map(({ product, qty, lineTotal }) => (
                     <div key={product.id} className="flex items-center gap-4 p-4">
-                      <img src={product.image} alt={product.name} className="h-16 w-16 rounded-xl object-cover" />
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="h-16 w-16 rounded-xl object-cover"
+                      />
                       <div className="flex-1 min-w-0">
-                        <div className="font-display truncate text-base text-charcoal">{product.name}</div>
-                        <div className="text-xs text-muted-foreground">{product.weight} · Qty {qty}</div>
+                        <div className="font-display truncate text-base text-charcoal">
+                          {product.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {product.weight} · Qty {qty}
+                        </div>
                       </div>
                       <div className="font-medium text-charcoal">{formatKES(lineTotal)}</div>
                     </div>
@@ -219,19 +303,34 @@ function Checkout() {
                 </div>
 
                 <div className="mt-6 rounded-2xl border border-border bg-background p-5 text-sm">
-                  <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Deliver to</div>
+                  <div className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                    Deliver to
+                  </div>
                   <div className="mt-2 text-charcoal">
                     <div className="font-semibold">{info.fullName}</div>
-                    <div>{info.address}, {info.town}, {info.county}</div>
+                    <div>
+                      {info.address}, {info.town}, {info.county}
+                    </div>
                     <div className="text-muted-foreground">Near {info.landmark}</div>
-                    <div className="mt-1 text-muted-foreground">{info.phone} · {info.email}</div>
+                    <div className="mt-1 text-muted-foreground">
+                      {info.phone} · {info.email}
+                    </div>
                   </div>
-                  <button onClick={() => setStep(1)} className="mt-3 text-xs font-semibold text-honey-deep hover:underline">Edit</button>
+                  <button
+                    onClick={() => setStep(1)}
+                    className="mt-3 text-xs font-semibold text-honey-deep hover:underline"
+                  >
+                    Edit
+                  </button>
                 </div>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <button onClick={() => setStep(1)} className="btn-outline-honey"><ArrowLeft className="h-4 w-4" /> Back</button>
-                  <button onClick={() => setStep(3)} className="btn-honey">Continue to payment <ArrowRight className="h-4 w-4" /></button>
+                  <button onClick={() => setStep(1)} className="btn-outline-honey">
+                    <ArrowLeft className="h-4 w-4" /> Back
+                  </button>
+                  <button onClick={() => setStep(3)} className="btn-honey">
+                    Continue to payment <ArrowRight className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
             )}
@@ -292,6 +391,9 @@ function Checkout() {
                     }`}
                   >
                     <div>
+                      <div className="font-display text-lg text-charcoal">M-PESA STK Push</div>
+                      <div className="text-xs text-muted-foreground">
+                        Recommended · instant confirmation
                       <div className="flex items-center justify-between">
                         <span className="grid h-11 w-11 place-items-center rounded-xl bg-charcoal text-cream shadow-sm">
                           <CreditCard className="h-5.5 w-5.5" />
@@ -324,6 +426,9 @@ function Checkout() {
                     }`}
                   >
                     <div>
+                      <div className="font-display text-lg text-charcoal">Bank Transfer</div>
+                      <div className="text-xs text-muted-foreground">
+                        Upload proof · verified by admin
                       <div className="flex items-center justify-between">
                         <span className="grid h-11 w-11 place-items-center rounded-xl bg-honey/30 text-honey-dark shadow-sm">
                           <Landmark className="h-5.5 w-5.5" />
@@ -347,6 +452,19 @@ function Checkout() {
 
                 {/* Form Details Area */}
                 {payMethod === "mpesa" && (
+                  <div className="mt-7 space-y-5">
+                    <div className="rounded-2xl border border-honey-deep/30 bg-honey/10 p-5 text-sm text-charcoal">
+                      Enter the M-Pesa number to receive an STK Push. You'll be prompted to enter
+                      your M-Pesa PIN.
+                    </div>
+                    <Field
+                      label="M-Pesa Phone Number"
+                      type="tel"
+                      placeholder="07XX XXX XXX"
+                      value={mpesaPhone}
+                      onChange={setMpesaPhone}
+                      required
+                    />
                   <div className="mt-8 space-y-5 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6">
                     <div className="flex items-start gap-3">
                       <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-600 text-cream">
@@ -396,6 +514,26 @@ function Checkout() {
                 {payMethod === "bank" && (
                   <div className="mt-8 space-y-5">
                     <div className="rounded-2xl border border-border bg-background p-5">
+                      <div className="text-xs font-semibold uppercase tracking-widest text-honey-deep">
+                        Bank Details
+                      </div>
+                      <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                        <div>
+                          <dt className="text-muted-foreground">Payment Method</dt>
+                          <dd className="font-medium text-charcoal">Paybill</dd>
+                        </div>
+                        <div>
+                          <dt className="text-muted-foreground">Paybill</dt>
+                          <dd className="font-medium text-charcoal">522533</dd>
+                        </div>
+                        <div>
+                          <dt className="text-muted-foreground">Account Number</dt>
+                          <dd className="font-medium text-charcoal">8122833</dd>
+                        </div>
+                        <div>
+                          <dt className="text-muted-foreground">Account Name</dt>
+                          <dd className="font-medium text-charcoal">Ntarakwai</dd>
+                        </div>
                       <div className="text-xs font-semibold uppercase tracking-widest text-honey-deep">Bank & Paybill Details</div>
                       <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
                         <div><dt className="text-muted-foreground">Payment Method</dt><dd className="font-medium text-charcoal">Paybill</dd></div>
@@ -405,46 +543,95 @@ function Checkout() {
                       </dl>
                     </div>
 
-                    <div className="text-sm font-semibold text-charcoal">Upload Proof of Payment</div>
-                    <div className="grid gap-5 sm:grid-cols-2">
-                      <Field label="Payment Reference Number" value={bankRef} onChange={setBankRef} required />
-                      <Field label="Transaction Date" type="date" value={bankDate} onChange={setBankDate} required />
+                    <div className="text-sm font-semibold text-charcoal">
+                      Upload Proof of Payment
                     </div>
-                    <Field label={`Amount Paid (${formatKES(total)})`} type="number" value={bankAmount} onChange={setBankAmount} required />
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <Field
+                        label="Payment Reference Number"
+                        value={bankRef}
+                        onChange={setBankRef}
+                        required
+                      />
+                      <Field
+                        label="Transaction Date"
+                        type="date"
+                        value={bankDate}
+                        onChange={setBankDate}
+                        required
+                      />
+                    </div>
+                    <Field
+                      label={`Amount Paid (${formatKES(total)})`}
+                      type="number"
+                      value={bankAmount}
+                      onChange={setBankAmount}
+                      required
+                    />
                     <label className="block text-sm font-medium text-charcoal">
                       Upload Bank Slip / Receipt
                       <div className="mt-1.5 flex items-center gap-3 rounded-2xl border-2 border-dashed border-border bg-background p-5">
                         <Upload className="h-5 w-5 text-honey-deep" />
                         <input
-                          type="file" accept="image/*,application/pdf"
+                          type="file"
+                          accept="image/*,application/pdf"
                           onChange={(e) => setBankFile(e.target.files?.[0] ?? null)}
                           className="text-sm text-muted-foreground file:mr-3 file:rounded-full file:border-0 file:bg-honey file:px-4 file:py-2 file:text-xs file:font-semibold file:text-charcoal"
                         />
-                        {bankFile && <span className="ml-auto text-xs text-muted-foreground">{bankFile.name}</span>}
+                        {bankFile && (
+                          <span className="ml-auto text-xs text-muted-foreground">
+                            {bankFile.name}
+                          </span>
+                        )}
                       </div>
                     </label>
                     <label className="block text-sm font-medium text-charcoal">
                       Additional Notes
-                      <textarea value={bankNotes} onChange={(e) => setBankNotes(e.target.value)} rows={3} className="mt-1.5 w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30" />
+                      <textarea
+                        value={bankNotes}
+                        onChange={(e) => setBankNotes(e.target.value)}
+                        rows={3}
+                        className="mt-1.5 w-full rounded-2xl border border-input bg-background px-4 py-3 text-sm outline-none focus:border-honey-deep focus:ring-2 focus:ring-honey/30"
+                      />
                     </label>
                   </div>
                 )}
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  <button onClick={() => setStep(2)} className="btn-outline-honey"><ArrowLeft className="h-4 w-4" /> Back</button>
+                  <button onClick={() => setStep(2)} className="btn-outline-honey">
+                    <ArrowLeft className="h-4 w-4" /> Back
+                  </button>
                   <button
                     onClick={handlePay}
+                    disabled={
+                      submitting ||
+                      (payMethod === "mpesa" && !mpesaPhone) ||
+                      (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))
+                    }
                     disabled={submitting || (payMethod === "mpesa" && !(mpesaPhone || info.phone)) || (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))}
                     className="btn-honey disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</> : <>Pay {formatKES(total)} <ArrowRight className="h-4 w-4" /></>}
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" /> Processing…
+                      </>
+                    ) : (
+                      <>
+                        Pay {formatKES(total)} <ArrowRight className="h-4 w-4" />
+                      </>
+                    )}
                   </button>
                 </div>
 
-                {error && <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+                {error && (
+                  <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                    {error}
+                  </div>
+                )}
 
                 <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-                  <ShieldCheck className="h-4 w-4 text-honey-deep" /> Your payment is processed securely. We never store card details.
+                  <ShieldCheck className="h-4 w-4 text-honey-deep" /> Your payment is processed
+                  securely. We never store card details.
                 </div>
               </div>
             )}
@@ -466,8 +653,14 @@ function Checkout() {
               ))}
             </ul>
             <div className="mt-5 space-y-2 border-t border-border pt-5 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatKES(subtotal)}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>{formatKES(delivery)}</span></div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>{formatKES(subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Delivery</span>
+                <span>{formatKES(delivery)}</span>
+              </div>
               <div className="mt-3 flex items-baseline justify-between border-t border-border pt-3">
                 <span className="font-display text-base text-charcoal">Total</span>
                 <span className="font-display text-2xl text-honey-deep">{formatKES(total)}</span>
@@ -475,7 +668,9 @@ function Checkout() {
             </div>
             <div className="mt-5 flex items-center gap-2 rounded-xl bg-secondary/70 p-3 text-xs text-muted-foreground">
               <Truck className="h-4 w-4 text-honey-deep" />
-              <span>Delivery via Via Wells Fargo or your preferred parcel courier — 1–3 business days.</span>
+              <span>
+                Delivery via Via Wells Fargo or your preferred parcel courier, 1–3 business days.
+              </span>
             </div>
           </aside>
         </div>
@@ -485,8 +680,20 @@ function Checkout() {
 }
 
 function Field({
-  label, value, onChange, type = "text", placeholder, required,
-}: { label: string; value: string; onChange: (v: string) => void; type?: string; placeholder?: string; required?: boolean }) {
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  required,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+}) {
   return (
     <label className="block text-sm font-medium text-charcoal">
       {label}

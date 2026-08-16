@@ -71,7 +71,10 @@ let inMemoryState: ShopState | null = null;
 function createDefaultState(): ShopState {
   return {
     products: Object.fromEntries(
-      SHOP_PRODUCTS.map((product) => [product.id, { stock: product.stock, reviews: [] as ShopReview[] }]),
+      SHOP_PRODUCTS.map((product) => [
+        product.id,
+        { stock: product.stock, reviews: [] as ShopReview[] },
+      ]),
     ),
     orders: [],
   };
@@ -106,7 +109,10 @@ async function writeState(state: ShopState): Promise<void> {
   }
 }
 
-function buildProductWithState(product: ShopProduct, entry: ProductStateEntry | undefined): ShopProduct {
+function buildProductWithState(
+  product: ShopProduct,
+  entry: ProductStateEntry | undefined,
+): ShopProduct {
   return {
     ...product,
     stock: entry?.stock ?? product.stock,
@@ -131,7 +137,10 @@ export async function getOrderStatus(orderNumber: string): Promise<CheckoutOrder
   return state.orders.find((entry) => entry.id === orderNumber);
 }
 
-export async function addProductReview(slug: string, input: ShopReviewInput): Promise<ShopProduct | undefined> {
+export async function addProductReview(
+  slug: string,
+  input: ShopReviewInput,
+): Promise<ShopProduct | undefined> {
   const product = SHOP_PRODUCTS.find((entry) => entry.slug === slug);
   if (!product) return undefined;
 
@@ -152,6 +161,13 @@ export async function addProductReview(slug: string, input: ShopReviewInput): Pr
   return buildProductWithState(product, entry);
 }
 
+export async function processCheckout(payload: CheckoutPayload): Promise<{
+  ok: boolean;
+  orderNumber: string;
+  paymentStatus: string;
+  paymentMessage: string;
+  checkoutRequestID?: string;
+}> {
 export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: boolean; orderNumber: string; paymentStatus: string; paymentMessage: string; checkoutRequestID?: string; redirectUrl?: string }> {
   const state = await readState();
 
@@ -254,6 +270,10 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: b
     ok: true,
     orderNumber,
     paymentStatus: order.paymentStatus,
+    paymentMessage:
+      payload.paymentMethod === "mpesa"
+        ? "Your M-Pesa STK push request has been sent. Please complete the prompt on your phone."
+        : "Your bank transfer request has been received and is awaiting confirmation.",
     paymentMessage: payload.paymentMethod === "mpesa"
       ? "An M-PESA STK push prompt has been sent to your phone. Please enter your PIN to complete payment."
       : payload.paymentMethod === "card"
@@ -264,12 +284,18 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: b
   };
 }
 
-export async function handleMpesaCallback(payload: MpesaCallbackPayload): Promise<{ ok: boolean; message: string }> {
+export async function handleMpesaCallback(
+  payload: MpesaCallbackPayload,
+): Promise<{ ok: boolean; message: string }> {
   const state = await readState();
   const callback = payload.Body?.stkCallback ?? payload;
   const checkoutRequestID = callback.CheckoutRequestID ?? payload.CheckoutRequestID;
   const merchantRequestID = callback.MerchantRequestID ?? payload.MerchantRequestID;
-  const order = state.orders.find((entry) => entry.checkoutRequestID === checkoutRequestID || entry.merchantRequestID === merchantRequestID);
+  const order = state.orders.find(
+    (entry) =>
+      entry.checkoutRequestID === checkoutRequestID ||
+      entry.merchantRequestID === merchantRequestID,
+  );
 
   if (!order) {
     return { ok: false, message: "Order not found for callback." };
@@ -290,12 +316,27 @@ export async function handleMpesaCallback(payload: MpesaCallbackPayload): Promis
   }
 
   await writeState(state);
-  return { ok: true, message: order.paymentStatus === "paid" ? "Payment confirmed." : "Payment failed; stock restored." };
+  return {
+    ok: true,
+    message:
+      order.paymentStatus === "paid" ? "Payment confirmed." : "Payment failed; stock restored.",
+  };
 }
 
-async function initiateMpesaPayment({ amount, phone, orderNumber }: { amount: number; phone: string; orderNumber: string }) {
-  const consumerKey = process.env.MPESA_CONSUMER_KEY || "uAW7d6v1dVjpYjcLMyubVmvVBn7LtE6iTcIaJIr1Fg4nwDGl";
-  const consumerSecret = process.env.MPESA_CONSUMER_SECRET || "6GAttjZEPuysj2CZbkc3VAoufQAS44azTDoymOSGhFpgn6FIKmiABmsJwznTQzTo";
+async function initiateMpesaPayment({
+  amount,
+  phone,
+  orderNumber,
+}: {
+  amount: number;
+  phone: string;
+  orderNumber: string;
+}) {
+  const consumerKey =
+    process.env.MPESA_CONSUMER_KEY || "uAW7d6v1dVjpYjcLMyubVmvVBn7LtE6iTcIaJIr1Fg4nwDGl";
+  const consumerSecret =
+    process.env.MPESA_CONSUMER_SECRET ||
+    "6GAttjZEPuysj2CZbkc3VAoufQAS44azTDoymOSGhFpgn6FIKmiABmsJwznTQzTo";
   const shortCode = process.env.MPESA_SHORTCODE || "174379";
   const passKey = process.env.MPESA_PASSKEY || "";
   const callbackUrl = process.env.MPESA_CALLBACK_URL || "http://localhost:3000/api/mpesa/callback";
@@ -307,6 +348,14 @@ async function initiateMpesaPayment({ amount, phone, orderNumber }: { amount: nu
     };
   }
 
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[-:T.]/g, "")
+    .slice(0, 14);
+  const password = Buffer.from(`${shortCode}${passKey}${timestamp}`).toString("base64");
+  const authResponse = await fetch(
+    "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    {
   try {
     const timestamp = new Date().toISOString().replace(/[-:T.]/g, "").slice(0, 14);
     const password = Buffer.from(`${shortCode}${passKey}${timestamp}`).toString("base64");
@@ -315,6 +364,13 @@ async function initiateMpesaPayment({ amount, phone, orderNumber }: { amount: nu
       headers: {
         Authorization: `Basic ${Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64")}`,
       },
+    },
+  );
+
+  if (!authResponse.ok) {
+    const body = await authResponse.text();
+    throw new Error(`Daraja auth failed: ${body}`);
+  }
     });
 
     if (!authResponse.ok) {
@@ -334,6 +390,17 @@ async function initiateMpesaPayment({ amount, phone, orderNumber }: { amount: nu
       };
     }
 
+  const data = JSON.parse(body) as {
+    CheckoutRequestID?: string;
+    MerchantRequestID?: string;
+    ResponseDescription?: string;
+  };
+  return {
+    ok: true,
+    checkoutRequestID: data.CheckoutRequestID,
+    merchantRequestID: data.MerchantRequestID,
+    message: data.ResponseDescription ?? "Daraja STK push accepted.",
+  };
     const phoneNumber = normalizePhone(phone);
     const response = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
       method: "POST",
@@ -388,6 +455,10 @@ function normalizePhone(input: string): string {
   return `254${digits}`;
 }
 
+export async function handleShopApiRequest(
+  pathname: string,
+  request: Request,
+): Promise<Response | null> {
 export async function handleKcbCallback(payload: KcbCallbackPayload): Promise<{ ok: boolean; message: string }> {
   const state = await readState();
   const callback = payload.Body?.stkCallback ?? payload;
@@ -439,11 +510,18 @@ export async function handleShopApiRequest(pathname: string, request: Request): 
       const result = await processCheckout(payload);
       return Response.json(result, { status: 200 });
     } catch (error) {
-      return Response.json({ ok: false, error: error instanceof Error ? error.message : "Checkout failed." }, { status: 400 });
+      return Response.json(
+        { ok: false, error: error instanceof Error ? error.message : "Checkout failed." },
+        { status: 400 },
+      );
     }
   }
 
-  if (pathname.startsWith("/api/products/") && pathname.endsWith("/reviews") && request.method === "POST") {
+  if (
+    pathname.startsWith("/api/products/") &&
+    pathname.endsWith("/reviews") &&
+    request.method === "POST"
+  ) {
     const slug = pathname.split("/api/products/")[1]?.replace(/\/reviews$/, "");
     if (!slug) {
       return Response.json({ ok: false, error: "Product slug is required." }, { status: 400 });
@@ -454,7 +532,10 @@ export async function handleShopApiRequest(pathname: string, request: Request): 
       const updatedProduct = await addProductReview(slug, payload);
       return Response.json({ ok: true, product: updatedProduct }, { status: 200 });
     } catch (error) {
-      return Response.json({ ok: false, error: error instanceof Error ? error.message : "Review could not be saved." }, { status: 400 });
+      return Response.json(
+        { ok: false, error: error instanceof Error ? error.message : "Review could not be saved." },
+        { status: 400 },
+      );
     }
   }
 
