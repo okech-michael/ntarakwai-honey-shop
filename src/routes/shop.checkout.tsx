@@ -11,6 +11,7 @@ import {
   Truck,
   Loader2,
 } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, Smartphone, Landmark, Upload, ShieldCheck, Truck, Loader2, CreditCard, Building2 } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
 import { useCart } from "@/lib/cart";
 import { formatKES } from "@/lib/products";
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/shop/checkout")({
 const DELIVERY_COUNTIES = ["Marsabit", "Isiolo", "Meru", "Laikipia", "Nairobi"];
 
 type Step = 1 | 2 | 3;
-type PayMethod = "mpesa" | "bank";
+type PayMethod = "mpesa" | "card" | "bank";
 
 interface CustomerInfo {
   fullName: string;
@@ -127,7 +128,7 @@ function Checkout() {
           address: info.address,
         },
         paymentMethod: payMethod,
-        phone: payMethod === "mpesa" ? mpesaPhone : undefined,
+        phone: payMethod === "mpesa" ? (mpesaPhone || info.phone) : undefined,
         amount: total,
       }),
     });
@@ -141,6 +142,12 @@ function Checkout() {
     }
 
     clear();
+
+    if (data.redirectUrl && data.redirectUrl.startsWith("http")) {
+      window.location.href = data.redirectUrl;
+      return;
+    }
+
     navigate({
       to: "/shop/checkout/success",
       search: { order: data.orderNumber, method: payMethod },
@@ -330,44 +337,120 @@ function Checkout() {
 
             {step === 3 && (
               <div className="rounded-3xl border border-border bg-card p-7 shadow-sm md:p-9">
-                <h2 className="font-display text-3xl text-charcoal">Payment method</h2>
-                <p className="mt-2 text-sm text-muted-foreground">Choose how you'd like to pay.</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-display text-3xl text-charcoal">Payment Method</h2>
+                    <p className="mt-1.5 text-sm text-muted-foreground">Select your preferred secure payment option.</p>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+                    <ShieldCheck className="h-3.5 w-3.5" /> 256-Bit SSL Encrypted
+                  </div>
+                </div>
 
-                {/* Method toggle */}
-                <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                {/* Method selection grid */}
+                <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                  {/* M-PESA Card */}
                   <button
                     type="button"
                     onClick={() => setPayMethod("mpesa")}
-                    className={`flex items-center gap-4 rounded-2xl border-2 p-5 text-left transition-all ${payMethod === "mpesa" ? "border-honey-deep bg-honey/10" : "border-border bg-background hover:border-honey/50"}`}
+                    className={`relative flex flex-col justify-between rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
+                      payMethod === "mpesa"
+                        ? "border-emerald-600 bg-emerald-500/10 shadow-md ring-1 ring-emerald-500/20"
+                        : "border-border bg-background hover:border-emerald-500/50 hover:bg-emerald-500/5"
+                    }`}
                   >
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-honey to-honey-deep text-charcoal">
-                      <Smartphone className="h-5 w-5" />
-                    </span>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-emerald-600 text-cream shadow-sm">
+                          <Smartphone className="h-5.5 w-5.5" />
+                        </span>
+                        <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+                          Instant
+                        </span>
+                      </div>
+                      <div className="mt-4 font-display text-lg text-charcoal">M-PESA Express</div>
+                      <div className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        Receive a direct STK push prompt on your mobile phone.
+                      </div>
+                    </div>
+                    {payMethod === "mpesa" && (
+                      <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-emerald-700">
+                        <Check className="h-3.5 w-3.5" /> Selected
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Card Payment Card */}
+                  <button
+                    type="button"
+                    onClick={() => setPayMethod("card")}
+                    className={`relative flex flex-col justify-between rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
+                      payMethod === "card"
+                        ? "border-charcoal bg-charcoal/5 shadow-md ring-1 ring-charcoal/20"
+                        : "border-border bg-background hover:border-charcoal/40 hover:bg-charcoal/5"
+                    }`}
+                  >
                     <div>
                       <div className="font-display text-lg text-charcoal">M-PESA STK Push</div>
                       <div className="text-xs text-muted-foreground">
                         Recommended · instant confirmation
+                      <div className="flex items-center justify-between">
+                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-charcoal text-cream shadow-sm">
+                          <CreditCard className="h-5.5 w-5.5" />
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="rounded bg-background px-1.5 py-0.5 text-[10px] font-bold text-charcoal border border-border">VISA</span>
+                          <span className="rounded bg-background px-1.5 py-0.5 text-[10px] font-bold text-charcoal border border-border">MC</span>
+                        </div>
+                      </div>
+                      <div className="mt-4 font-display text-lg text-charcoal">Credit / Debit Card</div>
+                      <div className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        Pay securely with Visa, Mastercard, or prepaid cards.
                       </div>
                     </div>
+                    {payMethod === "card" && (
+                      <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-charcoal">
+                        <Check className="h-3.5 w-3.5" /> Selected
+                      </div>
+                    )}
                   </button>
+
+                  {/* Bank Transfer Card */}
                   <button
                     type="button"
                     onClick={() => setPayMethod("bank")}
-                    className={`flex items-center gap-4 rounded-2xl border-2 p-5 text-left transition-all ${payMethod === "bank" ? "border-honey-deep bg-honey/10" : "border-border bg-background hover:border-honey/50"}`}
+                    className={`relative flex flex-col justify-between rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
+                      payMethod === "bank"
+                        ? "border-honey-deep bg-honey/10 shadow-md ring-1 ring-honey/20"
+                        : "border-border bg-background hover:border-honey/50 hover:bg-honey/5"
+                    }`}
                   >
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-secondary text-honey-dark">
-                      <Landmark className="h-5 w-5" />
-                    </span>
                     <div>
                       <div className="font-display text-lg text-charcoal">Bank Transfer</div>
                       <div className="text-xs text-muted-foreground">
                         Upload proof · verified by admin
+                      <div className="flex items-center justify-between">
+                        <span className="grid h-11 w-11 place-items-center rounded-xl bg-honey/30 text-honey-dark shadow-sm">
+                          <Landmark className="h-5.5 w-5.5" />
+                        </span>
+                        <span className="rounded-full bg-honey/30 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-honey-dark">
+                          Paybill
+                        </span>
+                      </div>
+                      <div className="mt-4 font-display text-lg text-charcoal">Bank Paybill</div>
+                      <div className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                        Pay via Paybill or bank transfer & upload transaction details.
                       </div>
                     </div>
+                    {payMethod === "bank" && (
+                      <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-honey-deep">
+                        <Check className="h-3.5 w-3.5" /> Selected
+                      </div>
+                    )}
                   </button>
                 </div>
 
-                {/* M-Pesa form */}
+                {/* Form Details Area */}
                 {payMethod === "mpesa" && (
                   <div className="mt-7 space-y-5">
                     <div className="rounded-2xl border border-honey-deep/30 bg-honey/10 p-5 text-sm text-charcoal">
@@ -382,12 +465,54 @@ function Checkout() {
                       onChange={setMpesaPhone}
                       required
                     />
+                  <div className="mt-8 space-y-5 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-600 text-cream">
+                        <Smartphone className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-display text-base text-charcoal">M-PESA Express STK Push</h4>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          An automated payment prompt will be dispatched to your phone. Enter your PIN to approve.
+                        </p>
+                      </div>
+                    </div>
+                    <Field
+                      label="M-PESA Phone Number"
+                      type="tel"
+                      placeholder="07XX XXX XXX"
+                      value={mpesaPhone || info.phone}
+                      onChange={setMpesaPhone}
+                      required
+                    />
                   </div>
                 )}
 
-                {/* Bank form */}
+                {payMethod === "card" && (
+                  <div className="mt-8 space-y-5 rounded-2xl border border-charcoal/15 bg-card p-6 shadow-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-charcoal text-cream">
+                        <CreditCard className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="font-display text-base text-charcoal">Secure Card Payment Gateway</h4>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Click <strong>Pay {formatKES(total)}</strong> below to launch the PCI-DSS compliant secure bank payment gateway.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-border bg-background p-4 text-xs text-muted-foreground space-y-2">
+                      <div className="flex items-center gap-2 text-charcoal font-medium">
+                        <ShieldCheck className="h-4 w-4 text-emerald-600" /> Guaranteed Bank Security
+                      </div>
+                      <p>Your card details are processed directly by our bank's encrypted payment gateway. Ntarakwai never sees or stores your full card numbers.</p>
+                    </div>
+                  </div>
+                )}
+
                 {payMethod === "bank" && (
-                  <div className="mt-7 space-y-5">
+                  <div className="mt-8 space-y-5">
                     <div className="rounded-2xl border border-border bg-background p-5">
                       <div className="text-xs font-semibold uppercase tracking-widest text-honey-deep">
                         Bank Details
@@ -409,6 +534,12 @@ function Checkout() {
                           <dt className="text-muted-foreground">Account Name</dt>
                           <dd className="font-medium text-charcoal">Ntarakwai</dd>
                         </div>
+                      <div className="text-xs font-semibold uppercase tracking-widest text-honey-deep">Bank & Paybill Details</div>
+                      <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                        <div><dt className="text-muted-foreground">Payment Method</dt><dd className="font-medium text-charcoal">Paybill</dd></div>
+                        <div><dt className="text-muted-foreground">Paybill Number</dt><dd className="font-medium text-charcoal">522533</dd></div>
+                        <div><dt className="text-muted-foreground">Account Number</dt><dd className="font-medium text-charcoal">8122833</dd></div>
+                        <div><dt className="text-muted-foreground">Account Name</dt><dd className="font-medium text-charcoal">Ntarakwai Honey</dd></div>
                       </dl>
                     </div>
 
@@ -438,7 +569,7 @@ function Checkout() {
                       required
                     />
                     <label className="block text-sm font-medium text-charcoal">
-                      Upload Bank Slip
+                      Upload Bank Slip / Receipt
                       <div className="mt-1.5 flex items-center gap-3 rounded-2xl border-2 border-dashed border-border bg-background p-5">
                         <Upload className="h-5 w-5 text-honey-deep" />
                         <input
@@ -477,6 +608,7 @@ function Checkout() {
                       (payMethod === "mpesa" && !mpesaPhone) ||
                       (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))
                     }
+                    disabled={submitting || (payMethod === "mpesa" && !(mpesaPhone || info.phone)) || (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))}
                     className="btn-honey disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {submitting ? (

@@ -1,7 +1,9 @@
 import { promises as fs } from "fs";
 import path from "path";
+import os from "os";
 import { fileURLToPath } from "url";
 import { SHOP_PRODUCTS, type ShopProduct, type ShopReview } from "./products";
+import { initiateKcbMpesaPush, initiateKcbCardPayment, type KcbCallbackPayload } from "./kcb-buni.server";
 
 export interface ShopReviewInput {
   name: string;
@@ -24,11 +26,12 @@ export interface CheckoutOrder {
   id: string;
   items: Array<{ productId: string; qty: number; unitPrice: number; lineTotal: number }>;
   customer: Record<string, string>;
-  paymentMethod: "mpesa" | "bank";
+  paymentMethod: "mpesa" | "card" | "bank";
   amount: number;
   paymentStatus: "pending" | "initiated" | "paid" | "failed";
   checkoutRequestID?: string;
   merchantRequestID?: string;
+  redirectUrl?: string;
   createdAt: string;
   paidAt?: string;
 }
@@ -36,7 +39,7 @@ export interface CheckoutOrder {
 interface CheckoutPayload {
   items: Array<{ productId: string; qty: number }>;
   customer: Record<string, string>;
-  paymentMethod: "mpesa" | "bank";
+  paymentMethod: "mpesa" | "card" | "bank";
   phone?: string;
   amount: number;
 }
@@ -58,7 +61,12 @@ interface MpesaCallbackPayload {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dataFilePath = path.resolve(process.cwd(), "data", "shop-state.json");
+const isVercel = Boolean(process.env.VERCEL);
+const dataFilePath = isVercel
+  ? path.resolve(os.tmpdir(), "shop-state.json")
+  : path.resolve(process.cwd(), "data", "shop-state.json");
+
+let inMemoryState: ShopState | null = null;
 
 function createDefaultState(): ShopState {
   return {
@@ -73,24 +81,32 @@ function createDefaultState(): ShopState {
 }
 
 async function readState(): Promise<ShopState> {
+  if (inMemoryState) return inMemoryState;
   try {
     await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
     const raw = await fs.readFile(dataFilePath, "utf8");
     const parsed = JSON.parse(raw) as ShopState;
-    return {
+    inMemoryState = {
       products: parsed.products ?? {},
       orders: parsed.orders ?? [],
     };
+    return inMemoryState;
   } catch {
     const defaultState = createDefaultState();
-    await writeState(defaultState);
+    inMemoryState = defaultState;
+    void writeState(defaultState);
     return defaultState;
   }
 }
 
 async function writeState(state: ShopState): Promise<void> {
-  await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
-  await fs.writeFile(dataFilePath, JSON.stringify(state, null, 2), "utf8");
+  inMemoryState = state;
+  try {
+    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+    await fs.writeFile(dataFilePath, JSON.stringify(state, null, 2), "utf8");
+  } catch (error) {
+    console.warn("Could not persist shop state to filesystem:", error);
+  }
 }
 
 function buildProductWithState(
@@ -152,6 +168,7 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
   paymentMessage: string;
   checkoutRequestID?: string;
 }> {
+export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: boolean; orderNumber: string; paymentStatus: string; paymentMessage: string; checkoutRequestID?: string; redirectUrl?: string }> {
   const state = await readState();
 
   const orderItems = [] as CheckoutOrder["items"];
@@ -188,15 +205,62 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
     createdAt: new Date().toISOString(),
   };
 
+  let kcbRedirectUrl: string | undefined;
+
   if (payload.paymentMethod === "mpesa") {
-    const mpesaResult = await initiateMpesaPayment({
+    const targetPhone = payload.phone ?? payload.customer.phone ?? "";
+    const kcbResult = await initiateKcbMpesaPush({
       amount: payload.amount,
-      phone: payload.phone ?? payload.customer.phone ?? "",
+      phone: targetPhone,
       orderNumber,
     });
-    order.paymentStatus = mpesaResult.ok ? "initiated" : "pending";
-    order.checkoutRequestID = mpesaResult.checkoutRequestID;
-    order.merchantRequestID = mpesaResult.merchantRequestID;
+
+    if (kcbResult.ok) {
+      order.paymentStatus = "initiated";
+      order.checkoutRequestID = kcbResult.checkoutRequestID;
+      order.merchantRequestID = kcbResult.merchantRequestID;
+    } else {
+      console.warn("Primary M-PESA provider (KCB Buni) failed, trying Daraja fallback:", kcbResult.message);
+      const mpesaResult = await initiateMpesaPayment({
+        amount: payload.amount,
+        phone: targetPhone,
+        orderNumber,
+      });
+
+      if (mpesaResult.ok) {
+        order.paymentStatus = "initiated";
+        order.checkoutRequestID = mpesaResult.checkoutRequestID;
+        order.merchantRequestID = mpesaResult.merchantRequestID;
+      } else {
+        // Rollback stock allocation
+        for (const item of payload.items) {
+          const entry = state.products[item.productId];
+          if (entry) entry.stock += item.qty;
+        }
+        throw new Error(`M-PESA Push failed. KCB Buni: ${kcbResult.message} | Daraja: ${mpesaResult.message}`);
+      }
+    }
+  } else if (payload.paymentMethod === "card") {
+    const cardResult = await initiateKcbCardPayment({
+      amount: payload.amount,
+      orderNumber,
+      customerEmail: payload.customer.email ?? "",
+      customerName: payload.customer.fullName ?? "",
+    });
+
+    if (cardResult.ok) {
+      order.paymentStatus = "initiated";
+      order.checkoutRequestID = cardResult.checkoutRequestID;
+      order.redirectUrl = cardResult.redirectUrl;
+      kcbRedirectUrl = cardResult.redirectUrl;
+    } else {
+      // Rollback stock allocation
+      for (const item of payload.items) {
+        const entry = state.products[item.productId];
+        if (entry) entry.stock += item.qty;
+      }
+      throw new Error(`Card Payment Gateway failed: ${cardResult.message}`);
+    }
   }
 
   state.orders.push(order);
@@ -210,7 +274,13 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
       payload.paymentMethod === "mpesa"
         ? "Your M-Pesa STK push request has been sent. Please complete the prompt on your phone."
         : "Your bank transfer request has been received and is awaiting confirmation.",
+    paymentMessage: payload.paymentMethod === "mpesa"
+      ? "An M-PESA STK push prompt has been sent to your phone. Please enter your PIN to complete payment."
+      : payload.paymentMethod === "card"
+      ? "Initializing secure card payment portal..."
+      : "Your bank transfer request has been received and is awaiting confirmation.",
     checkoutRequestID: order.checkoutRequestID,
+    redirectUrl: kcbRedirectUrl,
   };
 }
 
@@ -271,12 +341,10 @@ async function initiateMpesaPayment({
   const passKey = process.env.MPESA_PASSKEY || "";
   const callbackUrl = process.env.MPESA_CALLBACK_URL || "http://localhost:3000/api/mpesa/callback";
 
-  if (!passKey) {
+  if (!passKey || !consumerKey || !consumerSecret) {
     return {
       ok: false,
-      checkoutRequestID: `local-${Date.now()}`,
-      merchantRequestID: `local-${Date.now()}`,
-      message: "M-Pesa credentials incomplete; payment queued for manual confirmation.",
+      message: "Daraja M-Pesa credentials incomplete. Please configure MPESA_PASSKEY, MPESA_CONSUMER_KEY, and MPESA_CONSUMER_SECRET.",
     };
   }
 
@@ -288,6 +356,10 @@ async function initiateMpesaPayment({
   const authResponse = await fetch(
     "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
     {
+  try {
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, "").slice(0, 14);
+    const password = Buffer.from(`${shortCode}${passKey}${timestamp}`).toString("base64");
+    const authResponse = await fetch("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials", {
       method: "GET",
       headers: {
         Authorization: `Basic ${Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64")}`,
@@ -299,39 +371,24 @@ async function initiateMpesaPayment({
     const body = await authResponse.text();
     throw new Error(`Daraja auth failed: ${body}`);
   }
+    });
 
-  const authData = (await authResponse.json()) as { access_token?: string };
-  const accessToken = authData.access_token;
-  if (!accessToken) {
-    throw new Error("Daraja auth returned no access token.");
-  }
+    if (!authResponse.ok) {
+      const body = await authResponse.text();
+      return {
+        ok: false,
+        message: `Daraja OAuth authentication failed (${authResponse.status}): ${body}`,
+      };
+    }
 
-  const phoneNumber = normalizePhone(phone);
-  const response = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      BusinessShortCode: shortCode,
-      Password: password,
-      Timestamp: timestamp,
-      TransactionType: "CustomerPayBillOnline",
-      Amount: Math.round(amount),
-      PartyA: phoneNumber,
-      PartyB: shortCode,
-      PhoneNumber: phoneNumber,
-      CallBackURL: callbackUrl,
-      AccountReference: orderNumber,
-      TransactionDesc: `Ntarakwai order ${orderNumber}`,
-    }),
-  });
-
-  const body = await response.text();
-  if (!response.ok) {
-    throw new Error(`Daraja STK push failed: ${body}`);
-  }
+    const authData = (await authResponse.json()) as { access_token?: string };
+    const accessToken = authData.access_token;
+    if (!accessToken) {
+      return {
+        ok: false,
+        message: "Daraja OAuth returned no access token.",
+      };
+    }
 
   const data = JSON.parse(body) as {
     CheckoutRequestID?: string;
@@ -344,6 +401,50 @@ async function initiateMpesaPayment({
     merchantRequestID: data.MerchantRequestID,
     message: data.ResponseDescription ?? "Daraja STK push accepted.",
   };
+    const phoneNumber = normalizePhone(phone);
+    const response = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        BusinessShortCode: shortCode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: Math.round(amount),
+        PartyA: phoneNumber,
+        PartyB: shortCode,
+        PhoneNumber: phoneNumber,
+        CallBackURL: callbackUrl,
+        AccountReference: orderNumber,
+        TransactionDesc: `Ntarakwai order ${orderNumber}`,
+      }),
+    });
+
+    const body = await response.text();
+    if (!response.ok) {
+      return {
+        ok: false,
+        message: `Daraja STK push failed (${response.status}): ${body}`,
+      };
+    }
+
+    const data = JSON.parse(body) as { CheckoutRequestID?: string; MerchantRequestID?: string; ResponseDescription?: string };
+    return {
+      ok: true,
+      checkoutRequestID: data.CheckoutRequestID,
+      merchantRequestID: data.MerchantRequestID,
+      message: data.ResponseDescription ?? "Daraja STK push accepted.",
+    };
+  } catch (error) {
+    console.error("Daraja M-Pesa error:", error);
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Daraja M-Pesa request failed.",
+    };
+  }
 }
 
 function normalizePhone(input: string): string {
@@ -358,6 +459,46 @@ export async function handleShopApiRequest(
   pathname: string,
   request: Request,
 ): Promise<Response | null> {
+export async function handleKcbCallback(payload: KcbCallbackPayload): Promise<{ ok: boolean; message: string }> {
+  const state = await readState();
+  const callback = payload.Body?.stkCallback ?? payload;
+  const checkoutRequestID = callback.CheckoutRequestID ?? payload.CheckoutRequestID;
+  const merchantRequestID = callback.MerchantRequestID ?? payload.MerchantRequestID;
+  const orderNumber = payload.OrderNumber;
+
+  const order = state.orders.find(
+    (entry) =>
+      (checkoutRequestID && entry.checkoutRequestID === checkoutRequestID) ||
+      (merchantRequestID && entry.merchantRequestID === merchantRequestID) ||
+      (orderNumber && entry.id === orderNumber)
+  );
+
+  if (!order) {
+    return { ok: false, message: "Order not found for KCB callback." };
+  }
+
+  const resultCode = callback.ResultCode ?? payload.ResultCode ?? 0;
+  const isSuccessful = resultCode === 0 || payload.Status === "SUCCESS" || payload.Status === "PAID";
+
+  if (isSuccessful) {
+    order.paymentStatus = "paid";
+    order.paidAt = new Date().toISOString();
+  } else {
+    order.paymentStatus = "failed";
+    for (const item of order.items) {
+      const product = SHOP_PRODUCTS.find((entry) => entry.id === item.productId);
+      if (!product) continue;
+      const stockEntry = state.products[product.id] ?? { stock: product.stock, reviews: [] };
+      stockEntry.stock += item.qty;
+      state.products[product.id] = stockEntry;
+    }
+  }
+
+  await writeState(state);
+  return { ok: true, message: order.paymentStatus === "paid" ? "KCB Payment confirmed." : "KCB Payment failed; stock restored." };
+}
+
+export async function handleShopApiRequest(pathname: string, request: Request): Promise<Response | null> {
   if (pathname === "/api/products" && request.method === "GET") {
     const products = await getCatalogProducts();
     return Response.json({ products }, { status: 200 });
@@ -421,6 +562,12 @@ export async function handleShopApiRequest(
   if (pathname === "/api/mpesa/callback" && request.method === "POST") {
     const payload = (await request.json()) as MpesaCallbackPayload;
     const result = await handleMpesaCallback(payload);
+    return Response.json(result, { status: 200 });
+  }
+
+  if (pathname === "/api/kcb/callback" && request.method === "POST") {
+    const payload = (await request.json()) as KcbCallbackPayload;
+    const result = await handleKcbCallback(payload);
     return Response.json(result, { status: 200 });
   }
 
