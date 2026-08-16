@@ -129,7 +129,7 @@ function Checkout() {
           address: info.address,
         },
         paymentMethod: payMethod,
-        phone: payMethod === "mpesa" ? mpesaPhone : undefined,
+        phone: payMethod === "mpesa" ? (mpesaPhone || info.phone) : undefined,
         amount: total,
       }),
     });
@@ -143,6 +143,12 @@ function Checkout() {
     }
 
     clear();
+
+    if (data.redirectUrl && data.redirectUrl.startsWith("http")) {
+      window.location.href = data.redirectUrl;
+      return;
+    }
+
     navigate({
       to: "/shop/checkout/success",
       search: { order: data.orderNumber, method: payMethod },
@@ -332,8 +338,15 @@ function Checkout() {
 
             {step === 3 && (
               <div className="rounded-3xl border border-border bg-card p-7 shadow-sm md:p-9">
-                <h2 className="font-display text-3xl text-charcoal">Payment method</h2>
-                <p className="mt-2 text-sm text-muted-foreground">Choose how you'd like to pay.</p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-display text-3xl text-charcoal">Payment Method</h2>
+                    <p className="mt-1.5 text-sm text-muted-foreground">Select your preferred secure payment option.</p>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
+                    <ShieldCheck className="h-3.5 w-3.5" /> 256-Bit SSL Encrypted
+                  </div>
+                </div>
 
                 {/* Method selection grid */}
                 <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -428,7 +441,7 @@ function Checkout() {
                   </button>
                 </div>
 
-                {/* M-Pesa form */}
+                {/* Form Details Area */}
                 {payMethod === "mpesa" && (
                   <div className="mt-8 space-y-5 rounded-2xl border border-green-200 bg-green-50 p-6 shadow-sm">
                     <div className="flex items-start gap-3">
@@ -442,23 +455,19 @@ function Checkout() {
                         </p>
                       </div>
                     </div>
+                    <div className="mt-7 space-y-5">
+                      <Field
+                        label="M-Pesa Phone Number"
+                        type="tel"
+                        placeholder="07XX XXX XXX"
+                        value={mpesaPhone || info.phone}
+                        onChange={setMpesaPhone}
+                        required
+                      />
+                    </div>
                   </div>
                 )}
 
-                {payMethod === "mpesa" && (
-                  <div className="mt-7 space-y-5">
-                    <Field
-                      label="M-Pesa Phone Number"
-                      type="tel"
-                      placeholder="07XX XXX XXX"
-                      value={mpesaPhone}
-                      onChange={setMpesaPhone}
-                      required
-                    />
-                  </div>
-                )}
-
-                {/* Card form */}
                 {payMethod === "card" && (
                   <div className="mt-8 space-y-5 rounded-2xl border border-charcoal/15 bg-card p-6 shadow-sm">
                     <div className="flex items-start gap-3">
@@ -481,9 +490,8 @@ function Checkout() {
                   </div>
                 )}
 
-                {/* Bank form */}
                 {payMethod === "bank" && (
-                  <div className="mt-7 space-y-5">
+                  <div className="mt-8 space-y-5">
                     <div className="rounded-2xl border border-border bg-background p-5">
                       <div className="text-xs font-semibold uppercase tracking-widest text-honey-deep">
                         Bank Details
@@ -534,7 +542,7 @@ function Checkout() {
                       required
                     />
                     <label className="block text-sm font-medium text-charcoal">
-                      Upload Bank Slip
+                      Upload Bank Slip / Receipt
                       <div className="mt-1.5 flex items-center gap-3 rounded-2xl border-2 border-dashed border-border bg-background p-5">
                         <Upload className="h-5 w-5 text-honey-deep" />
                         <input
@@ -570,7 +578,7 @@ function Checkout() {
                     onClick={handlePay}
                     disabled={
                       submitting ||
-                      (payMethod === "mpesa" && !mpesaPhone) ||
+                      (payMethod === "mpesa" && !(mpesaPhone || info.phone)) ||
                       (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))
                     }
                     className="btn-honey disabled:cursor-not-allowed disabled:opacity-60"

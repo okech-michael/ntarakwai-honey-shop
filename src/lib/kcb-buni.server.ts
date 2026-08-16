@@ -1,4 +1,4 @@
-﻿export interface KcbMpesaPushInput {
+export interface KcbMpesaPushInput {
   amount: number;
   phone: string;
   orderNumber: string;

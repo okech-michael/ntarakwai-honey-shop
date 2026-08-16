@@ -64,13 +64,22 @@ export default async function handler(request, response) {
     if (served) return;
   }
 
-  const req = new Request(url.toString(), {
-    method: request.method,
-    headers: request.headers,
-    body: request.method !== "GET" && request.method !== "HEAD" ? request : null,
-  });
-
   try {
+    let bodyBuffer = null;
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      const chunks = [];
+      for await (const chunk of request) {
+        chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+      }
+      bodyBuffer = Buffer.concat(chunks);
+    }
+
+    const req = new Request(url.toString(), {
+      method: request.method,
+      headers: request.headers,
+      body: bodyBuffer,
+    });
+
     const entry = await getServerEntry();
     const res = await entry.default.fetch(req, {}, {});
     response.statusCode = res.status;
@@ -78,8 +87,9 @@ export default async function handler(request, response) {
     const body = await res.arrayBuffer();
     response.end(Buffer.from(body));
   } catch (error) {
+    console.error("Vercel Serverless Handler Error:", error);
     response.statusCode = 500;
-    response.setHeader("content-type", "text/html; charset=utf-8");
-    response.end("Internal Server Error");
+    response.setHeader("content-type", "application/json");
+    response.end(JSON.stringify({ ok: false, error: error instanceof Error ? error.message : "Internal Server Error" }));
   }
 }

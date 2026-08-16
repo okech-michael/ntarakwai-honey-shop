@@ -42,7 +42,7 @@ function Success() {
     };
 
     void refresh();
-    const interval = window.setInterval(() => void refresh(), 4000);
+    const interval = window.setInterval(() => void refresh(), 3000);
     return () => {
       isActive = false;
       window.clearInterval(interval);

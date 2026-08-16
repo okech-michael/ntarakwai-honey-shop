@@ -101,8 +101,12 @@ async function readState(): Promise<ShopState> {
 
 async function writeState(state: ShopState): Promise<void> {
   inMemoryState = state;
-  await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
-  await fs.writeFile(dataFilePath, JSON.stringify(state, null, 2), "utf8");
+  try {
+    await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
+    await fs.writeFile(dataFilePath, JSON.stringify(state, null, 2), "utf8");
+  } catch (error) {
+    console.warn("Could not persist shop state to filesystem:", error);
+  }
 }
 
 function buildProductWithState(
@@ -202,25 +206,57 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
   };
 
   if (payload.paymentMethod === "mpesa") {
+    const targetPhone = payload.phone ?? payload.customer.phone ?? "";
     const kcbResult = await initiateKcbMpesaPush({
       amount: payload.amount,
-      phone: payload.phone ?? payload.customer.phone ?? "",
+      phone: targetPhone,
       orderNumber,
       description: `Ntarakwai Honey Order ${orderNumber}`,
     });
-    order.paymentStatus = kcbResult.ok ? "initiated" : "pending";
-    order.checkoutRequestID = kcbResult.checkoutRequestID;
-    order.merchantRequestID = kcbResult.merchantRequestID;
+
+    if (kcbResult.ok) {
+      order.paymentStatus = "initiated";
+      order.checkoutRequestID = kcbResult.checkoutRequestID;
+      order.merchantRequestID = kcbResult.merchantRequestID;
+    } else {
+      console.warn("Primary M-PESA provider (KCB Buni) failed, trying Daraja fallback:", kcbResult.message);
+      const mpesaResult = await initiateMpesaPayment({
+        amount: payload.amount,
+        phone: targetPhone,
+        orderNumber,
+      });
+
+      if (mpesaResult.ok) {
+        order.paymentStatus = "initiated";
+        order.checkoutRequestID = mpesaResult.checkoutRequestID;
+        order.merchantRequestID = mpesaResult.merchantRequestID;
+      } else {
+        for (const item of payload.items) {
+          const entry = state.products[item.productId];
+          if (entry) entry.stock += item.qty;
+        }
+        throw new Error(`M-PESA Push failed. KCB Buni: ${kcbResult.message} | Daraja: ${mpesaResult.message}`);
+      }
+    }
   } else if (payload.paymentMethod === "card") {
-    const kcbResult = await initiateKcbCardPayment({
+    const cardResult = await initiateKcbCardPayment({
       amount: payload.amount,
       orderNumber,
       customerEmail: payload.customer.email ?? "",
-      customerName: payload.customer.name ?? "",
+      customerName: payload.customer.fullName ?? payload.customer.name ?? "Customer",
     });
-    order.paymentStatus = kcbResult.ok ? "initiated" : "pending";
-    order.checkoutRequestID = kcbResult.checkoutRequestID;
-    order.redirectUrl = kcbResult.redirectUrl;
+
+    if (cardResult.ok) {
+      order.paymentStatus = "initiated";
+      order.checkoutRequestID = cardResult.checkoutRequestID;
+      order.redirectUrl = cardResult.redirectUrl;
+    } else {
+      for (const item of payload.items) {
+        const entry = state.products[item.productId];
+        if (entry) entry.stock += item.qty;
+      }
+      throw new Error(`Card Payment Gateway failed: ${cardResult.message}`);
+    }
   }
 
   state.orders.push(order);
@@ -234,7 +270,7 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
       payload.paymentMethod === "mpesa"
         ? "Your M-Pesa STK push request has been sent. Please complete the prompt on your phone."
         : payload.paymentMethod === "card"
-          ? "You will be redirected to the payment gateway to complete your card payment."
+          ? "You will be redirected to the secure payment gateway to complete your card payment."
           : "Your bank transfer request has been received and is awaiting confirmation.",
     checkoutRequestID: order.checkoutRequestID,
     redirectUrl: order.redirectUrl,
@@ -337,79 +373,92 @@ async function initiateMpesaPayment({
   const passKey = process.env.MPESA_PASSKEY || "";
   const callbackUrl = process.env.MPESA_CALLBACK_URL || "http://localhost:3000/api/mpesa/callback";
 
-  if (!passKey) {
+  if (!passKey || !consumerKey || !consumerSecret) {
     return {
       ok: false,
-      checkoutRequestID: `local-${Date.now()}`,
-      merchantRequestID: `local-${Date.now()}`,
-      message: "M-Pesa credentials incomplete; payment queued for manual confirmation.",
+      message: "Daraja M-Pesa credentials incomplete. Please configure MPESA_PASSKEY, MPESA_CONSUMER_KEY, and MPESA_CONSUMER_SECRET.",
     };
   }
 
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[-:T.]/g, "")
-    .slice(0, 14);
-  const password = Buffer.from(`${shortCode}${passKey}${timestamp}`).toString("base64");
-  const authResponse = await fetch(
-    "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64")}`,
+  try {
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, "").slice(0, 14);
+    const password = Buffer.from(`${shortCode}${passKey}${timestamp}`).toString("base64");
+    const authResponse = await fetch(
+      "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${consumerKey}:${consumerSecret}`).toString("base64")}`,
+        },
       },
-    },
-  );
+    );
 
-  if (!authResponse.ok) {
-    const body = await authResponse.text();
-    throw new Error(`Daraja auth failed: ${body}`);
+    if (!authResponse.ok) {
+      const body = await authResponse.text();
+      return {
+        ok: false,
+        message: `Daraja OAuth authentication failed (${authResponse.status}): ${body}`,
+      };
+    }
+
+    const authData = (await authResponse.json()) as { access_token?: string };
+    const accessToken = authData.access_token;
+    if (!accessToken) {
+      return {
+        ok: false,
+        message: "Daraja OAuth returned no access token.",
+      };
+    }
+
+    const phoneNumber = normalizePhone(phone);
+    const response = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        BusinessShortCode: shortCode,
+        Password: password,
+        Timestamp: timestamp,
+        TransactionType: "CustomerPayBillOnline",
+        Amount: Math.round(amount),
+        PartyA: phoneNumber,
+        PartyB: shortCode,
+        PhoneNumber: phoneNumber,
+        CallBackURL: callbackUrl,
+        AccountReference: orderNumber,
+        TransactionDesc: `Ntarakwai order ${orderNumber}`,
+      }),
+    });
+
+    const body = await response.text();
+    if (!response.ok) {
+      return {
+        ok: false,
+        message: `Daraja STK push failed (${response.status}): ${body}`,
+      };
+    }
+
+    const data = JSON.parse(body) as {
+      CheckoutRequestID?: string;
+      MerchantRequestID?: string;
+      ResponseDescription?: string;
+    };
+
+    return {
+      ok: true,
+      checkoutRequestID: data.CheckoutRequestID,
+      merchantRequestID: data.MerchantRequestID,
+      message: data.ResponseDescription ?? "Daraja STK push accepted.",
+    };
+  } catch (error) {
+    console.error("Daraja M-Pesa error:", error);
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Daraja M-Pesa request failed.",
+    };
   }
-
-  const authData = (await authResponse.json()) as { access_token?: string };
-  const accessToken = authData.access_token;
-  if (!accessToken) {
-    throw new Error("Daraja auth returned no access token.");
-  }
-
-  const phoneNumber = normalizePhone(phone);
-  const response = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      BusinessShortCode: shortCode,
-      Password: password,
-      Timestamp: timestamp,
-      TransactionType: "CustomerPayBillOnline",
-      Amount: Math.round(amount),
-      PartyA: phoneNumber,
-      PartyB: shortCode,
-      PhoneNumber: phoneNumber,
-      CallBackURL: callbackUrl,
-      AccountReference: orderNumber,
-      TransactionDesc: `Ntarakwai order ${orderNumber}`,
-    }),
-  });
-
-  const body = await response.text();
-  if (!response.ok) {
-    throw new Error(`Daraja STK push failed: ${body}`);
-  }
-
-  const data = JSON.parse(body) as {
-    CheckoutRequestID?: string;
-    MerchantRequestID?: string;
-    ResponseDescription?: string;
-  };
-  return {
-    ok: true,
-    checkoutRequestID: data.CheckoutRequestID,
-    merchantRequestID: data.MerchantRequestID,
-    message: data.ResponseDescription ?? "Daraja STK push accepted.",
-  };
 }
 
 function normalizePhone(input: string): string {
