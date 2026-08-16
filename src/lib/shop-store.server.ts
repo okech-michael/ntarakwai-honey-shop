@@ -1,7 +1,9 @@
 import { promises as fs } from "fs";
 import path from "path";
+import os from "os";
 import { fileURLToPath } from "url";
 import { SHOP_PRODUCTS, type ShopProduct, type ShopReview } from "./products";
+import { initiateKcbMpesaPush, initiateKcbCardPayment, type KcbCallbackPayload } from "./kcb-buni.server";
 
 export interface ShopReviewInput {
   name: string;
@@ -24,11 +26,12 @@ export interface CheckoutOrder {
   id: string;
   items: Array<{ productId: string; qty: number; unitPrice: number; lineTotal: number }>;
   customer: Record<string, string>;
-  paymentMethod: "mpesa" | "bank";
+  paymentMethod: "mpesa" | "card" | "bank";
   amount: number;
   paymentStatus: "pending" | "initiated" | "paid" | "failed";
   checkoutRequestID?: string;
   merchantRequestID?: string;
+  redirectUrl?: string;
   createdAt: string;
   paidAt?: string;
 }
@@ -36,7 +39,7 @@ export interface CheckoutOrder {
 interface CheckoutPayload {
   items: Array<{ productId: string; qty: number }>;
   customer: Record<string, string>;
-  paymentMethod: "mpesa" | "bank";
+  paymentMethod: "mpesa" | "card" | "bank";
   phone?: string;
   amount: number;
 }
@@ -58,7 +61,12 @@ interface MpesaCallbackPayload {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dataFilePath = path.resolve(process.cwd(), "data", "shop-state.json");
+const isVercel = Boolean(process.env.VERCEL);
+const dataFilePath = isVercel
+  ? path.resolve(os.tmpdir(), "shop-state.json")
+  : path.resolve(process.cwd(), "data", "shop-state.json");
+
+let inMemoryState: ShopState | null = null;
 
 function createDefaultState(): ShopState {
   return {
@@ -73,22 +81,26 @@ function createDefaultState(): ShopState {
 }
 
 async function readState(): Promise<ShopState> {
+  if (inMemoryState) return inMemoryState;
   try {
     await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
     const raw = await fs.readFile(dataFilePath, "utf8");
     const parsed = JSON.parse(raw) as ShopState;
-    return {
+    inMemoryState = {
       products: parsed.products ?? {},
       orders: parsed.orders ?? [],
     };
+    return inMemoryState;
   } catch {
     const defaultState = createDefaultState();
-    await writeState(defaultState);
+    inMemoryState = defaultState;
+    void writeState(defaultState);
     return defaultState;
   }
 }
 
 async function writeState(state: ShopState): Promise<void> {
+  inMemoryState = state;
   await fs.mkdir(path.dirname(dataFilePath), { recursive: true });
   await fs.writeFile(dataFilePath, JSON.stringify(state, null, 2), "utf8");
 }
@@ -151,6 +163,7 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
   paymentStatus: string;
   paymentMessage: string;
   checkoutRequestID?: string;
+  redirectUrl?: string;
 }> {
   const state = await readState();
 
@@ -189,14 +202,25 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
   };
 
   if (payload.paymentMethod === "mpesa") {
-    const mpesaResult = await initiateMpesaPayment({
+    const kcbResult = await initiateKcbMpesaPush({
       amount: payload.amount,
       phone: payload.phone ?? payload.customer.phone ?? "",
       orderNumber,
+      description: `Ntarakwai Honey Order ${orderNumber}`,
     });
-    order.paymentStatus = mpesaResult.ok ? "initiated" : "pending";
-    order.checkoutRequestID = mpesaResult.checkoutRequestID;
-    order.merchantRequestID = mpesaResult.merchantRequestID;
+    order.paymentStatus = kcbResult.ok ? "initiated" : "pending";
+    order.checkoutRequestID = kcbResult.checkoutRequestID;
+    order.merchantRequestID = kcbResult.merchantRequestID;
+  } else if (payload.paymentMethod === "card") {
+    const kcbResult = await initiateKcbCardPayment({
+      amount: payload.amount,
+      orderNumber,
+      customerEmail: payload.customer.email ?? "",
+      customerName: payload.customer.name ?? "",
+    });
+    order.paymentStatus = kcbResult.ok ? "initiated" : "pending";
+    order.checkoutRequestID = kcbResult.checkoutRequestID;
+    order.redirectUrl = kcbResult.redirectUrl;
   }
 
   state.orders.push(order);
@@ -209,8 +233,11 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{
     paymentMessage:
       payload.paymentMethod === "mpesa"
         ? "Your M-Pesa STK push request has been sent. Please complete the prompt on your phone."
-        : "Your bank transfer request has been received and is awaiting confirmation.",
+        : payload.paymentMethod === "card"
+          ? "You will be redirected to the payment gateway to complete your card payment."
+          : "Your bank transfer request has been received and is awaiting confirmation.",
     checkoutRequestID: order.checkoutRequestID,
+    redirectUrl: order.redirectUrl,
   };
 }
 
@@ -250,6 +277,45 @@ export async function handleMpesaCallback(
     ok: true,
     message:
       order.paymentStatus === "paid" ? "Payment confirmed." : "Payment failed; stock restored.",
+  };
+}
+
+export async function handleKcbCallback(
+  payload: KcbCallbackPayload,
+): Promise<{ ok: boolean; message: string }> {
+  const state = await readState();
+  const checkoutRequestID = payload.CheckoutRequestID;
+  const orderNumber = payload.OrderNumber;
+
+  const order = state.orders.find(
+    (entry) =>
+      entry.checkoutRequestID === checkoutRequestID ||
+      entry.id === orderNumber,
+  );
+
+  if (!order) {
+    return { ok: false, message: "Order not found for KCB callback." };
+  }
+
+  if ((payload.ResultCode ?? 0) === 0) {
+    order.paymentStatus = "paid";
+    order.paidAt = new Date().toISOString();
+  } else {
+    order.paymentStatus = "failed";
+    for (const item of order.items) {
+      const product = SHOP_PRODUCTS.find((entry) => entry.id === item.productId);
+      if (!product) continue;
+      const stockEntry = state.products[product.id] ?? { stock: product.stock, reviews: [] };
+      stockEntry.stock += item.qty;
+      state.products[product.id] = stockEntry;
+    }
+  }
+
+  await writeState(state);
+  return {
+    ok: true,
+    message:
+      order.paymentStatus === "paid" ? "KCB Payment confirmed." : "KCB Payment failed; stock restored.",
   };
 }
 
@@ -376,52 +442,63 @@ export async function handleShopApiRequest(
     }
   }
 
-  if (
-    pathname.startsWith("/api/products/") &&
-    pathname.endsWith("/reviews") &&
-    request.method === "POST"
-  ) {
-    const slug = pathname.split("/api/products/")[1]?.replace(/\/reviews$/, "");
-    if (!slug) {
-      return Response.json({ ok: false, error: "Product slug is required." }, { status: 400 });
+  if (pathname === "/api/order-status" && request.method === "GET") {
+    const url = new URL(request.url);
+    const orderNumber = url.searchParams.get("orderNumber");
+    if (!orderNumber) {
+      return Response.json(
+        { ok: false, error: "Missing orderNumber parameter." },
+        { status: 400 },
+      );
     }
 
-    const payload = (await request.json()) as ShopReviewInput;
+    const order = await getOrderStatus(orderNumber);
+    return Response.json(
+      { ok: true, order },
+      { status: order ? 200 : 404 },
+    );
+  }
+
+  if (pathname === "/api/mpesa/callback" && request.method === "POST") {
+    const payload = (await request.json()) as MpesaCallbackPayload;
     try {
-      const updatedProduct = await addProductReview(slug, payload);
-      return Response.json({ ok: true, product: updatedProduct }, { status: 200 });
+      const result = await handleMpesaCallback(payload);
+      return Response.json(result, { status: 200 });
     } catch (error) {
       return Response.json(
-        { ok: false, error: error instanceof Error ? error.message : "Review could not be saved." },
+        { ok: false, error: error instanceof Error ? error.message : "Callback processing failed." },
         { status: 400 },
       );
     }
   }
 
-  if (pathname.startsWith("/api/products/") && request.method === "GET") {
-    const slug = pathname.replace("/api/products/", "").replace(/\/$/, "");
-    if (!slug) {
-      return Response.json({ ok: false, error: "Product slug is required." }, { status: 400 });
+  if (pathname === "/api/kcb/callback" && request.method === "POST") {
+    const payload = (await request.json()) as KcbCallbackPayload;
+    try {
+      const result = await handleKcbCallback(payload);
+      return Response.json(result, { status: 200 });
+    } catch (error) {
+      return Response.json(
+        { ok: false, error: error instanceof Error ? error.message : "KCB callback processing failed." },
+        { status: 400 },
+      );
     }
-
-    const product = await getProductBySlug(slug);
-    if (!product) {
-      return Response.json({ ok: false, error: "Product not found." }, { status: 404 });
-    }
-
-    return Response.json({ product }, { status: 200 });
   }
 
-  if (pathname.startsWith("/api/orders/") && request.method === "GET") {
-    const orderNumber = pathname.replace("/api/orders/", "").replace(/\/$/, "");
-    const order = await getOrderStatus(orderNumber);
-    return Response.json({ order }, { status: order ? 200 : 404 });
-  }
-
-  if (pathname === "/api/mpesa/callback" && request.method === "POST") {
-    const payload = (await request.json()) as MpesaCallbackPayload;
-    const result = await handleMpesaCallback(payload);
-    return Response.json(result, { status: 200 });
+  if (pathname === "/api/product-review" && request.method === "POST") {
+    const payload = (await request.json()) as { slug: string; review: ShopReviewInput };
+    try {
+      const updated = await addProductReview(payload.slug, payload.review);
+      return Response.json(
+        { ok: true, product: updated },
+        { status: updated ? 200 : 404 },
+      );
+    } catch (error) {
+      return Response.json(
+        { ok: false, error: error instanceof Error ? error.message : "Review submission failed." },
+        { status: 400 },
+      );
+    }
   }
 
   return null;

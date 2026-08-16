@@ -5,7 +5,7 @@ import { Check, ShoppingBag, Phone, Truck, Mail } from "lucide-react";
 
 const search = z.object({
   order: z.string().optional(),
-  method: z.enum(["mpesa", "bank"]).optional(),
+  method: z.enum(["mpesa", "card", "bank"]).optional(),
 });
 
 export const Route = createFileRoute("/shop/checkout/success")({
@@ -22,15 +22,15 @@ export const Route = createFileRoute("/shop/checkout/success")({
 
 function Success() {
   const { order, method } = Route.useSearch();
-  const isMpesa = method === "mpesa";
+  const isAutoChecking = method === "mpesa" || method === "card";
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "paid" | "failed">("pending");
 
   useEffect(() => {
-    if (!order || !isMpesa) return;
+    if (!order || !isAutoChecking) return;
 
     let isActive = true;
     const refresh = async () => {
-      const response = await fetch(`/api/orders/${order}`);
+      const response = await fetch(`/api/order-status?orderNumber=${order}`);
       if (!isActive) return;
       if (response.ok) {
         const data = await response.json();
@@ -47,7 +47,7 @@ function Success() {
       isActive = false;
       window.clearInterval(interval);
     };
-  }, [isMpesa, order]);
+  }, [isAutoChecking, order]);
 
   return (
     <div className="bg-background pt-32 pb-20">
@@ -58,17 +58,17 @@ function Success() {
               <Check className="h-9 w-9" strokeWidth={3} />
             </div>
             <h1 className="font-display mt-7 text-4xl text-charcoal md:text-5xl">
-              {isMpesa && paymentStatus === "paid"
+              {isAutoChecking && paymentStatus === "paid"
                 ? "Payment received!"
-                : isMpesa
+                : isAutoChecking
                   ? "Payment pending"
                   : "Order received!"}
             </h1>
             <p className="mt-4 text-base text-muted-foreground">
-              {isMpesa
+              {isAutoChecking
                 ? paymentStatus === "paid"
-                  ? "Your M-Pesa payment has been confirmed. We're preparing your order for dispatch."
-                  : "Your M-Pesa payment is being confirmed automatically. Please keep your phone nearby while the prompt completes."
+                  ? "Your payment has been confirmed by KCB Buni / M-Pesa. We're preparing your order for dispatch."
+                  : "Your payment is being confirmed automatically. Please complete the prompt on your phone or browser."
                 : "Your bank payment is now pending verification. We'll confirm within 24 hours."}
             </p>
 
