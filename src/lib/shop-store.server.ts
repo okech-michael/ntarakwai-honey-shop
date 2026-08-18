@@ -204,25 +204,12 @@ export async function processCheckout(payload: CheckoutPayload): Promise<{ ok: b
       order.checkoutRequestID = kcbResult.checkoutRequestID;
       order.merchantRequestID = kcbResult.merchantRequestID;
     } else {
-      console.warn("Primary M-PESA provider (KCB Buni) failed, trying Daraja fallback:", kcbResult.message);
-      const mpesaResult = await initiateMpesaPayment({
-        amount: payload.amount,
-        phone: targetPhone,
-        orderNumber,
-      });
-
-      if (mpesaResult.ok) {
-        order.paymentStatus = "initiated";
-        order.checkoutRequestID = mpesaResult.checkoutRequestID;
-        order.merchantRequestID = mpesaResult.merchantRequestID;
-      } else {
-        // Rollback stock allocation
-        for (const item of payload.items) {
-          const entry = state.products[item.productId];
-          if (entry) entry.stock += item.qty;
-        }
-        throw new Error(`M-PESA Push failed. KCB Buni: ${kcbResult.message} | Daraja: ${mpesaResult.message}`);
+      // Rollback stock allocation
+      for (const item of payload.items) {
+        const entry = state.products[item.productId];
+        if (entry) entry.stock += item.qty;
       }
+      throw new Error(`KCB Buni M-PESA Push failed: ${kcbResult.message}`);
     }
   } else if (payload.paymentMethod === "card") {
     const cardResult = await initiateKcbCardPayment({

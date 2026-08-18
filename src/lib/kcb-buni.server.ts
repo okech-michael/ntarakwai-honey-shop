@@ -107,7 +107,8 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
     const timestamp = new Date().toISOString().replace(/[-:T.]/g, "").slice(0, 14);
     const password = Buffer.from(`${shortCode}${passKey}${timestamp}`).toString("base64");
 
-    const response = await fetch(`${baseUrl}/buni/v1/stkpush`, {
+    const stkPushEndpoint = process.env.KCB_BUNI_STK_ENDPOINT || `${baseUrl}/mm/api/request/1.0.0/stkpush`;
+    const response = await fetch(stkPushEndpoint, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

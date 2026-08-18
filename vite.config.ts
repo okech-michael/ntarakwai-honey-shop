@@ -7,6 +7,9 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
+  server: {
+    allowedHosts: [".loca.lt", ".trycloudflare.com", "hottest-coupons-against-political.trycloudflare.com"],
+  },
   plugins: [
     tailwindcss(),
     ...tanstackStart({
