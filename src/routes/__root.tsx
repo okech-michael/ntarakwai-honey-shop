@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -145,17 +146,19 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isCheckoutRoute = pathname.startsWith("/shop/checkout");
 
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <div className="min-h-screen bg-background text-foreground">
-          <Header />
+          {!isCheckoutRoute && <Header />}
           <main>
             <Outlet />
           </main>
-          <Footer />
-          <MobileCallButton />
+          {!isCheckoutRoute && <Footer />}
+          {!isCheckoutRoute && <MobileCallButton />}
         </div>
       </CartProvider>
     </QueryClientProvider>
