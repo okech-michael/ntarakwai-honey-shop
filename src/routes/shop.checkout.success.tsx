@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { Check, ShoppingBag, Phone, Truck, Mail, Loader2, AlertCircle, RefreshCw, ArrowRight } from "lucide-react";
 import { formatKES } from "@/lib/products";
+import { PaymentShell } from "@/components/payment/PaymentShell";
 
 const search = z.object({
   order: z.string().optional(),
@@ -13,8 +13,8 @@ export const Route = createFileRoute("/shop/checkout/success")({
   validateSearch: search,
   head: () => ({
     meta: [
-      { title: "Order Confirmed — Ntarakwai Shop" },
-      { name: "description", content: "Your honey order has been received." },
+      { title: "Order Receipt — Ntarakwai Honey" },
+      { name: "description", content: "Your Ntarakwai order confirmation and receipt." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -32,12 +32,19 @@ interface OrderData {
     fullName?: string;
     email?: string;
     phone?: string;
+    town?: string;
+    county?: string;
   };
+  items?: Array<{
+    productId: string;
+    qty: number;
+    unitPrice: number;
+    lineTotal: number;
+  }>;
 }
 
 function Success() {
   const { order, method } = Route.useSearch();
-  const isAutoChecking = method === "mpesa" || method === "card";
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +74,6 @@ function Success() {
 
     void fetchOrder();
 
-    // If order is pending/initiated, poll every 3 seconds
     const interval = window.setInterval(() => {
       if (orderData?.paymentStatus === "paid" || orderData?.paymentStatus === "failed") {
         window.clearInterval(interval);
@@ -88,140 +94,109 @@ function Success() {
   const isPending = paymentStatus === "initiated" || paymentStatus === "pending";
 
   return (
-    <div className="bg-background pt-32 pb-20">
-      <div className="container-luxe">
-        <div className="mx-auto max-w-2xl">
-          <div className="rounded-[2rem] border border-border bg-card p-8 text-center shadow-[var(--shadow-card)] md:p-12">
-            {/* Status Icon */}
-            {isPaid ? (
-              <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 text-cream shadow-lg">
-                <Check className="h-9 w-9" strokeWidth={3} />
-              </div>
-            ) : isFailed ? (
-              <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-red-500 to-red-700 text-cream shadow-lg">
-                <AlertCircle className="h-9 w-9" strokeWidth={2.5} />
-              </div>
-            ) : (
-              <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-honey to-honey-deep text-charcoal shadow-lg">
-                <Loader2 className="h-9 w-9 animate-spin" />
-              </div>
-            )}
-
-            {/* Header Title */}
-            <h1 className="font-display mt-7 text-3xl text-charcoal md:text-4xl">
-              {isPaid
-                ? "Payment successful!"
-                : isFailed
-                ? "Payment wasn't completed"
-                : method === "bank"
-                ? "Bank transfer received"
-                : "Waiting for payment…"}
-            </h1>
-
-            {/* Subtitle */}
-            <p className="mt-3 text-sm text-muted-foreground md:text-base max-w-lg mx-auto">
-              {isPaid
-                ? "Your payment was received and confirmed. We're carefully preparing your raw honey for dispatch."
-                : isFailed
-                ? "We couldn't confirm your M-PESA payment. No successful transaction was recorded for this order."
-                : method === "bank"
-                ? "Your bank payment receipt has been uploaded and is being verified by our team."
-                : "We are awaiting confirmation from M-PESA. If you entered your PIN, this page will update automatically."}
-            </p>
-
-            {/* Order Card Metadata */}
-            {order && (
-              <div className="mt-8 rounded-2xl border border-border bg-secondary/40 p-5 text-left text-xs text-charcoal sm:text-sm">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <span className="text-muted-foreground block text-xs">Order Number</span>
-                    <strong className="font-display text-base text-honey-deep">#{order}</strong>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground block text-xs">Payment Method</span>
-                    <strong className="capitalize">{orderData?.paymentMethod ?? method ?? "M-PESA"}</strong>
-                  </div>
-                  {orderData?.amount ? (
-                    <div>
-                      <span className="text-muted-foreground block text-xs">Total Amount</span>
-                      <strong className="text-charcoal">{formatKES(orderData.amount)}</strong>
-                    </div>
-                  ) : null}
-                  <div>
-                    <span className="text-muted-foreground block text-xs">Payment Status</span>
-                    <span
-                      className={`inline-flex items-center gap-1 font-semibold rounded-full px-2.5 py-0.5 text-xs ${
-                        isPaid
-                          ? "bg-emerald-100 text-emerald-800"
-                          : isFailed
-                          ? "bg-red-100 text-red-800"
-                          : "bg-amber-100 text-amber-800"
-                      }`}
-                    >
-                      {isPaid ? "Paid" : isFailed ? "Failed" : "Awaiting Confirmation"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Information Cards */}
-            {isPaid && (
-              <div className="mt-8 grid gap-4 text-left sm:grid-cols-3">
-                <Card icon={<Mail className="h-5 w-5" />} t="Order receipt" s="Check your email for confirmation." />
-                <Card icon={<Truck className="h-5 w-5" />} t="Dispatch" s="Courier tracking details will follow shortly." />
-                <Card icon={<Phone className="h-5 w-5" />} t="Support" s="Call/WhatsApp +254 711 856 795" />
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
-              {isPaid ? (
-                <>
-                  <Link to="/shop/products" className="btn-honey">
-                    <ShoppingBag className="h-4 w-4" /> Continue shopping
-                  </Link>
-                  <Link to="/" className="btn-outline-honey">
-                    Back to home
-                  </Link>
-                </>
-              ) : isFailed ? (
-                <>
-                  <Link to="/shop/checkout" className="btn-honey">
-                    <RefreshCw className="h-4 w-4" /> Try payment again
-                  </Link>
-                  <Link to="/shop/products" className="btn-outline-honey">
-                    Return to shop
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => window.location.reload()}
-                    className="btn-outline-honey inline-flex items-center gap-2"
-                  >
-                    <RefreshCw className="h-4 w-4" /> Refresh status
-                  </button>
-                  <Link to="/shop/products" className="btn-honey">
-                    Continue browsing
-                  </Link>
-                </>
-              )}
-            </div>
+    <PaymentShell showBack={false}>
+      <div className="space-y-8 text-center py-4">
+        {/* Header / Amount Hero */}
+        <div>
+          <div className="text-xs uppercase tracking-widest font-semibold text-muted-foreground">
+            {isPaid ? "Payment confirmed" : isFailed ? "Payment not completed" : "Payment in progress"}
           </div>
+
+          <h1 className="font-display text-4xl text-charcoal mt-1">
+            {orderData?.amount ? formatKES(orderData.amount) : "Ntarakwai Order"}
+          </h1>
+
+          <p className="mt-2 text-xs text-muted-foreground max-w-sm mx-auto">
+            {isPaid
+              ? "Your payment was received and your order of raw Mt. Kulal honey is being prepared for dispatch."
+              : isFailed
+              ? "We couldn't record a completed payment for this order. No funds were captured."
+              : method === "bank"
+              ? "Your bank transfer reference has been recorded and is pending account verification."
+              : "We are awaiting confirmation from M-PESA. This page will update automatically."}
+          </p>
+        </div>
+
+        {/* Receipt Key-Value Details */}
+        {order && (
+          <div className="border-y border-border/80 py-4 text-left text-xs space-y-2.5">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Order Reference</span>
+              <span className="font-mono text-charcoal font-medium">#{order}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Payment Method</span>
+              <span className="text-charcoal capitalize">{orderData?.paymentMethod ?? method ?? "M-PESA"}</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Status</span>
+              <span
+                className={`font-semibold ${
+                  isPaid
+                    ? "text-emerald-700"
+                    : isFailed
+                    ? "text-red-700"
+                    : "text-amber-700"
+                }`}
+              >
+                {isPaid ? "Paid & Confirmed" : isFailed ? "Failed / Incomplete" : "Awaiting Verification"}
+              </span>
+            </div>
+
+            {orderData?.customer?.fullName && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Deliver To</span>
+                <span className="text-charcoal">{orderData.customer.fullName} ({orderData.customer.town})</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Primary Next Actions */}
+        <div className="pt-2 flex flex-col gap-2.5">
+          {isPaid ? (
+            <>
+              <Link
+                to="/shop/products"
+                className="w-full rounded-full bg-charcoal text-cream py-3 text-xs font-semibold hover:bg-charcoal/90 transition text-center"
+              >
+                Continue browsing
+              </Link>
+              <Link
+                to="/"
+                className="text-xs text-muted-foreground hover:text-charcoal transition underline"
+              >
+                Return to home
+              </Link>
+            </>
+          ) : isFailed ? (
+            <>
+              <Link
+                to="/shop/checkout"
+                className="w-full rounded-full bg-charcoal text-cream py-3 text-xs font-semibold hover:bg-charcoal/90 transition text-center"
+              >
+                Try payment again
+              </Link>
+              <Link
+                to="/shop/products"
+                className="text-xs text-muted-foreground hover:text-charcoal transition underline"
+              >
+                Return to shop
+              </Link>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="w-full rounded-full border border-border py-2.5 text-xs font-semibold text-charcoal hover:bg-secondary/40 transition"
+            >
+              Refresh payment status
+            </button>
+          )}
         </div>
       </div>
-    </div>
-  );
-}
-
-function Card({ icon, t, s }: { icon: React.ReactNode; t: string; s: string }) {
-  return (
-    <div className="rounded-2xl border border-border bg-background p-4.5">
-      <span className="grid h-9 w-9 place-items-center rounded-xl bg-honey/20 text-honey-deep">{icon}</span>
-      <div className="mt-2.5 font-display text-sm text-charcoal">{t}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{s}</div>
-    </div>
+    </PaymentShell>
   );
 }
