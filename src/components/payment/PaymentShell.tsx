@@ -68,14 +68,19 @@ export function PaymentShell({
       <footer className="border-t border-border/60 py-6 px-5 bg-background">
         <div className="mx-auto max-w-md text-center flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-muted-foreground">
           <span>Mt. Kulal, Marsabit County · Kenya</span>
-          <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition">
+          <a
+            href="https://terraseptsolutions.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition group"
+          >
             <span>Payments infrastructure by</span>
             <img
               src={terraseptLogo}
               alt="TerraSept Solutions"
-              className="h-3.5 w-auto object-contain inline-block"
+              className="h-3.5 w-auto object-contain inline-block group-hover:scale-105 transition"
             />
-          </div>
+          </a>
         </div>
       </footer>
     </div>
