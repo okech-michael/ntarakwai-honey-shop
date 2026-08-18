@@ -396,14 +396,13 @@ function Checkout() {
                         <span className="grid h-11 w-11 place-items-center rounded-xl bg-charcoal text-cream shadow-sm">
                           <CreditCard className="h-5.5 w-5.5" />
                         </span>
-                        <div className="flex items-center gap-1">
-                          <span className="rounded bg-background px-1.5 py-0.5 text-[10px] font-bold text-charcoal border border-border">VISA</span>
-                          <span className="rounded bg-background px-1.5 py-0.5 text-[10px] font-bold text-charcoal border border-border">MC</span>
-                        </div>
+                        <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border border-border">
+                          Coming Soon
+                        </span>
                       </div>
                       <div className="mt-4 font-display text-lg text-charcoal">Credit / Debit Card</div>
                       <div className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                        Pay securely with Visa, Mastercard, or prepaid cards.
+                        Online Visa & Mastercard checkout via bank gateway.
                       </div>
                     </div>
                     {payMethod === "card" && (
@@ -479,24 +478,34 @@ function Checkout() {
                 )}
 
                 {payMethod === "card" && (
-                  <div className="mt-8 space-y-5 rounded-2xl border border-charcoal/15 bg-card p-6 shadow-sm">
+                  <div className="mt-8 space-y-5 rounded-2xl border border-border bg-card p-6 shadow-sm">
                     <div className="flex items-start gap-3">
                       <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-charcoal text-cream">
                         <CreditCard className="h-4 w-4" />
                       </div>
                       <div>
-                        <h4 className="font-display text-base text-charcoal">Secure Card Payment Gateway</h4>
-                        <p className="mt-0.5 text-xs text-muted-foreground">
-                          Click <strong>Pay {formatKES(total)}</strong> below to launch the PCI-DSS compliant secure bank payment gateway.
+                        <h4 className="font-display text-base text-charcoal">Card Payments Coming Soon</h4>
+                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                          We are completing onboarding with our bank partners for direct Visa and Mastercard card acquiring. In the meantime, please complete your order using <strong>M-PESA Express</strong> (instant push prompt) or <strong>Bank Paybill</strong>.
                         </p>
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-border bg-background p-4 text-xs text-muted-foreground space-y-2">
-                      <div className="flex items-center gap-2 text-charcoal font-medium">
-                        <ShieldCheck className="h-4 w-4 text-emerald-600" /> Guaranteed Bank Security
-                      </div>
-                      <p>Your card details are processed directly by our bank's encrypted payment gateway. Ntarakwai never sees or stores your full card numbers.</p>
+                    <div className="flex flex-wrap gap-2.5 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setPayMethod("mpesa")}
+                        className="btn-honey text-xs py-2 px-4"
+                      >
+                        <Smartphone className="h-3.5 w-3.5" /> Pay with M-PESA Express
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPayMethod("bank")}
+                        className="btn-outline-honey text-xs py-2 px-4"
+                      >
+                        <Landmark className="h-3.5 w-3.5" /> Pay with Bank Paybill
+                      </button>
                     </div>
                   </div>
                 )}
@@ -542,11 +551,18 @@ function Checkout() {
                   <button onClick={() => setStep(2)} className="btn-outline-honey"><ArrowLeft className="h-4 w-4" /> Back</button>
                   <button
                     onClick={handlePay}
-                    disabled={submitting || (payMethod === "mpesa" && !(mpesaPhone || info.phone)) || (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))}
+                    disabled={
+                      submitting ||
+                      payMethod === "card" ||
+                      (payMethod === "mpesa" && !(mpesaPhone || info.phone)) ||
+                      (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))
+                    }
                     className="btn-honey disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {submitting ? (
                       <><Loader2 className="h-4 w-4 animate-spin" /> Sending payment request…</>
+                    ) : payMethod === "card" ? (
+                      <>Select M-PESA or Paybill to Pay</>
                     ) : (
                       <>Pay {formatKES(total)} <ArrowRight className="h-4 w-4" /></>
                     )}
