@@ -59,12 +59,21 @@
 }
 
 @layer base {
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+  }
   body {
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
 }
 
 @utility container-luxe {
@@ -72,7 +81,9 @@
   margin-inline: auto;
   max-width: 80rem;
   padding-inline: 1.25rem;
-  @media (min-width: 768px) { padding-inline: 2rem; }
+  @media (min-width: 768px) {
+    padding-inline: 2rem;
+  }
 }
 
 @utility btn-honey {
@@ -87,8 +98,14 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   box-shadow: var(--shadow-luxe);
-  transition: transform .3s ease, box-shadow .3s ease, filter .3s ease;
-  &:hover { transform: translateY(-2px); filter: brightness(1.05); }
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    filter 0.3s ease;
+  &:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+  }
 }
 
 @utility btn-outline-honey {
@@ -102,14 +119,19 @@
   color: var(--honey-dark);
   background: transparent;
   font-weight: 600;
-  transition: all .3s ease;
-  &:hover { background: var(--honey-deep); color: var(--cream); }
+  transition: all 0.3s ease;
+  &:hover {
+    background: var(--honey-deep);
+    color: var(--cream);
+  }
 }
 
 @utility reveal {
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity .9s ease, transform .9s cubic-bezier(.2,.7,.2,1);
+  transition:
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 @utility reveal-in {
   opacity: 1 !important;
@@ -120,31 +142,60 @@
 @utility reveal-slow {
   opacity: 0;
   transform: translateY(44px);
-  transition: opacity 1.6s cubic-bezier(.16,.8,.24,1), transform 1.6s cubic-bezier(.16,.8,.24,1);
+  transition:
+    opacity 1.6s cubic-bezier(0.16, 0.8, 0.24, 1),
+    transform 1.6s cubic-bezier(0.16, 0.8, 0.24, 1);
 }
 
 @keyframes float-y {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-14px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
 }
 @keyframes drift {
-  0% { transform: translate(0,0); opacity: 0; }
-  10% { opacity: .8; }
-  100% { transform: translate(40px,-120px); opacity: 0; }
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(40px, -120px);
+    opacity: 0;
+  }
 }
 @keyframes ken-burns {
-  0% { transform: scale(1.02) translate3d(0,0,0); }
-  100% { transform: scale(1.16) translate3d(-1.5%, -1.5%, 0); }
+  0% {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.16) translate3d(-1.5%, -1.5%, 0);
+  }
 }
 @keyframes line-grow {
-  from { transform: scaleY(0); }
-  to { transform: scaleY(1); }
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
 }
-@utility animate-float { animation: float-y 6s ease-in-out infinite; }
-@utility animate-ken-burns { animation: ken-burns 26s ease-out forwards; }
+@utility animate-float {
+  animation: float-y 6s ease-in-out infinite;
+}
+@utility animate-ken-burns {
+  animation: ken-burns 26s ease-out forwards;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-ken-burns { animation: none; }
+  .animate-ken-burns {
+    animation: none;
+  }
 }
 
 /* Editorial drop-cap for story openers */
@@ -153,8 +204,8 @@
     float: left;
     font-family: var(--font-display);
     font-size: 4.2rem;
-    line-height: .82;
-    padding: .18rem .6rem 0 0;
+    line-height: 0.82;
+    padding: 0.18rem 0.6rem 0 0;
     color: var(--honey-deep);
   }
 }
@@ -169,19 +220,18 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: .16;
+  opacity: 0.16;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
 }
-
 
 :root {
   --radius: 0.5rem;
   --background: oklch(0.992 0.008 85);
-  --foreground: oklch(0.20 0.025 60);
+  --foreground: oklch(0.2 0.025 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.025 60);
+  --card-foreground: oklch(0.2 0.025 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.025 60);
+  --popover-foreground: oklch(0.2 0.025 60);
   --primary: oklch(0.74 0.165 75);
   --primary-foreground: oklch(0.18 0.02 60);
   --secondary: oklch(0.955 0.025 82);
@@ -192,7 +242,7 @@
   --accent-foreground: oklch(0.99 0.01 85);
   --destructive: oklch(0.55 0.22 27);
   --destructive-foreground: oklch(0.99 0.01 85);
-  --border: oklch(0.90 0.018 80);
+  --border: oklch(0.9 0.018 80);
   --input: oklch(0.92 0.015 80);
   --ring: oklch(0.74 0.165 75);
 
@@ -204,7 +254,11 @@
   --charcoal: oklch(0.18 0.018 60);
 
   --gradient-honey: linear-gradient(135deg, oklch(0.82 0.16 85), oklch(0.6 0.17 55));
-  --gradient-radial-honey: radial-gradient(ellipse at top, oklch(0.85 0.15 82 / 0.35), transparent 70%);
+  --gradient-radial-honey: radial-gradient(
+    ellipse at top,
+    oklch(0.85 0.15 82 / 0.35),
+    transparent 70%
+  );
   --shadow-luxe: 0 30px 80px -30px oklch(0.45 0.15 55 / 0.35);
   --shadow-card: 0 12px 40px -16px oklch(0.45 0.15 55 / 0.25);
 
@@ -262,6 +316,11 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  body { background-color: var(--color-background); color: var(--color-foreground); }
+  * {
+    border-color: var(--color-border);
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
 }
