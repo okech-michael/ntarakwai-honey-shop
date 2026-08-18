@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState, useEffect, type FormEvent } from "react";
 import { Check, ArrowRight, ArrowLeft, Smartphone, Landmark, Upload, ShieldCheck, Truck, Loader2, CreditCard, Building2 } from "lucide-react";
 import { useReveal } from "@/hooks/use-reveal";
 import { useCart } from "@/lib/cart";
@@ -25,10 +25,28 @@ const DELIVERY_COUNTIES = [
 
 type Step = 1 | 2 | 3;
 type PayMethod = "mpesa" | "card" | "bank";
+type PaymentState = "idle" | "initiating" | "awaiting_payment" | "paid" | "failed" | "cancelled" | "timeout";
 
 interface CustomerInfo {
   fullName: string; phone: string; email: string;
   county: string; town: string; landmark: string; address: string;
+}
+
+function isValidKenyanPhone(phone: string): boolean {
+  const clean = phone.replace(/[\s\-\+]/g, "");
+  return /^(?:254|0)?([17]\d{8})$/.test(clean);
+}
+
+function formatMaskedPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  let local = digits;
+  if (local.startsWith("254") && local.length === 12) {
+    local = `0${local.slice(3)}`;
+  }
+  if (local.length >= 10) {
+    return `${local.slice(0, 4)} ••• ••${local.slice(-3)}`;
+  }
+  return phone;
 }
 
 function Checkout() {
@@ -48,6 +66,10 @@ function Checkout() {
   const [bankNotes, setBankNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [paymentState, setPaymentState] = useState<PaymentState>("idle");
+  const [activeOrderNumber, setActiveOrderNumber] = useState<string | null>(null);
+  const [pollSeconds, setPollSeconds] = useState(0);
 
   const delivery = useMemo(() => {
     if (subtotal === 0) return 0;
@@ -57,7 +79,52 @@ function Checkout() {
   }, [info.county, subtotal]);
   const total = subtotal + delivery;
 
-  if (count === 0 && !submitting) {
+  // Poll payment status when in awaiting_payment state
+  useEffect(() => {
+    if (paymentState !== "awaiting_payment" || !activeOrderNumber) return;
+
+    let isMounted = true;
+    const pollInterval = window.setInterval(async () => {
+      setPollSeconds((prev) => {
+        if (prev >= 60) {
+          setPaymentState("timeout");
+          window.clearInterval(pollInterval);
+          return prev;
+        }
+        return prev + 2;
+      });
+
+      try {
+        const res = await fetch(`/api/orders/${activeOrderNumber}`);
+        if (!isMounted || !res.ok) return;
+        const data = await res.json();
+        const status = data?.order?.paymentStatus;
+
+        if (status === "paid") {
+          setPaymentState("paid");
+          window.clearInterval(pollInterval);
+          clear();
+          navigate({
+            to: "/shop/checkout/success",
+            search: { order: activeOrderNumber, method: payMethod },
+          });
+        } else if (status === "failed") {
+          setPaymentState("failed");
+          window.clearInterval(pollInterval);
+          setError("Your M-PESA payment was not completed or was cancelled. Please try again.");
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+      }
+    }, 2500);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(pollInterval);
+    };
+  }, [paymentState, activeOrderNumber, clear, navigate, payMethod]);
+
+  if (count === 0 && !submitting && paymentState !== "awaiting_payment") {
     return (
       <div className="bg-background pt-32 pb-20">
         <div className="container-luxe mx-auto max-w-md text-center">
@@ -81,54 +148,87 @@ function Checkout() {
       return;
     }
 
+    if (!isValidKenyanPhone(info.phone)) {
+      setError("Please enter a valid Kenyan phone number (e.g. 07XX XXX XXX or 01XX XXX XXX).");
+      return;
+    }
+
     setError("");
     setStep(2);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function handlePay() {
+    if (submitting || paymentState === "initiating") return;
+
+    const targetPhone = payMethod === "mpesa" ? (mpesaPhone || info.phone) : info.phone;
+
+    if (payMethod === "mpesa") {
+      if (!isValidKenyanPhone(targetPhone)) {
+        setPhoneError("Please enter a valid M-PESA phone number (e.g. 07XX XXX XXX).");
+        return;
+      }
+      setPhoneError("");
+    }
+
     setSubmitting(true);
+    setPaymentState("initiating");
     setError("");
 
-    const response = await fetch("/api/checkout", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        items: resolved.map(({ product, qty }) => ({ productId: product.id, qty })),
-        customer: {
-          fullName: info.fullName,
-          phone: info.phone,
-          email: info.email,
-          county: info.county,
-          town: info.town,
-          landmark: info.landmark,
-          address: info.address,
-        },
-        paymentMethod: payMethod,
-        phone: payMethod === "mpesa" ? (mpesaPhone || info.phone) : undefined,
-        amount: total,
-      }),
-    });
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: resolved.map(({ product, qty }) => ({ productId: product.id, qty })),
+          customer: {
+            fullName: info.fullName,
+            phone: info.phone,
+            email: info.email,
+            county: info.county,
+            town: info.town,
+            landmark: info.landmark,
+            address: info.address,
+          },
+          paymentMethod: payMethod,
+          phone: targetPhone,
+          amount: total,
+        }),
+      });
 
-    const data = await response.json();
-    setSubmitting(false);
+      const data = await response.json();
+      setSubmitting(false);
 
-    if (!response.ok || !data?.ok) {
-      setError(data?.error ?? "We could not process this order right now.");
-      return;
+      if (!response.ok || !data?.ok) {
+        setPaymentState("failed");
+        setError(data?.error ?? "We could not process this order right now. Please try again.");
+        return;
+      }
+
+      const orderNum = data.orderNumber;
+      setActiveOrderNumber(orderNum);
+
+      if (data.redirectUrl && data.redirectUrl.startsWith("http")) {
+        clear();
+        window.location.href = data.redirectUrl;
+        return;
+      }
+
+      if (payMethod === "mpesa") {
+        setPollSeconds(0);
+        setPaymentState("awaiting_payment");
+      } else {
+        clear();
+        navigate({
+          to: "/shop/checkout/success",
+          search: { order: orderNum, method: payMethod },
+        });
+      }
+    } catch (err) {
+      setSubmitting(false);
+      setPaymentState("failed");
+      setError("We couldn't confirm the payment request. Please check your network and try again.");
     }
-
-    clear();
-
-    if (data.redirectUrl && data.redirectUrl.startsWith("http")) {
-      window.location.href = data.redirectUrl;
-      return;
-    }
-
-    navigate({
-      to: "/shop/checkout/success",
-      search: { order: data.orderNumber, method: payMethod },
-    });
   }
 
   return (
@@ -364,9 +464,17 @@ function Checkout() {
                       type="tel"
                       placeholder="07XX XXX XXX"
                       value={mpesaPhone || info.phone}
-                      onChange={setMpesaPhone}
+                      onChange={(v) => {
+                        setMpesaPhone(v);
+                        if (phoneError) setPhoneError("");
+                      }}
                       required
                     />
+                    {phoneError && (
+                      <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-3.5 py-2 text-xs font-medium text-destructive">
+                        {phoneError}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -437,11 +545,15 @@ function Checkout() {
                     disabled={submitting || (payMethod === "mpesa" && !(mpesaPhone || info.phone)) || (payMethod === "bank" && (!bankRef || !bankDate || !bankAmount))}
                     className="btn-honey disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> Processing…</> : <>Pay {formatKES(total)} <ArrowRight className="h-4 w-4" /></>}
+                    {submitting ? (
+                      <><Loader2 className="h-4 w-4 animate-spin" /> Sending payment request…</>
+                    ) : (
+                      <>Pay {formatKES(total)} <ArrowRight className="h-4 w-4" /></>
+                    )}
                   </button>
                 </div>
 
-                {error && <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+                {error && <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
 
                 <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
                   <ShieldCheck className="h-4 w-4 text-honey-deep" /> Your payment is processed securely. We never store card details.
@@ -449,6 +561,80 @@ function Checkout() {
               </div>
             )}
           </div>
+
+          {/* Modal / Dedicated Overlay: Awaiting Payment */}
+          {(paymentState === "awaiting_payment" || paymentState === "timeout") && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="w-full max-w-md rounded-3xl border border-border bg-card p-7 shadow-2xl md:p-9 text-center space-y-6">
+                <div className="relative mx-auto grid h-20 w-20 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                  <Smartphone className="h-10 w-10 animate-bounce" />
+                  <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500"></span>
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="font-display text-2xl text-charcoal">Check your phone</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    We've sent an M-PESA payment prompt to <strong className="text-charcoal">{formatMaskedPhone(mpesaPhone || info.phone)}</strong>
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-border bg-secondary/50 p-4 text-left space-y-2.5 text-xs text-charcoal">
+                  <div className="flex items-center gap-2 font-medium text-emerald-800">
+                    <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-200 text-[10px] font-bold">1</span>
+                    Look for the M-PESA prompt on your phone screen
+                  </div>
+                  <div className="flex items-center gap-2 font-medium text-emerald-800">
+                    <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-200 text-[10px] font-bold">2</span>
+                    Confirm the amount is <strong>{formatKES(total)}</strong>
+                  </div>
+                  <div className="flex items-center gap-2 font-medium text-emerald-800">
+                    <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-200 text-[10px] font-bold">3</span>
+                    Enter your M-PESA PIN to authorize payment
+                  </div>
+                </div>
+
+                {paymentState === "awaiting_payment" ? (
+                  <div className="flex items-center justify-center gap-2 text-xs font-semibold text-honey-deep">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Waiting for payment confirmation…
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 text-left">
+                    <strong>Payment confirmation is taking longer than expected.</strong> If you already entered your PIN, please don't pay again — your order will be updated automatically as soon as the confirmation arrives.
+                  </div>
+                )}
+
+                <div className="pt-2 flex flex-col gap-2">
+                  {paymentState === "timeout" && activeOrderNumber && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        clear();
+                        navigate({
+                          to: "/shop/checkout/success",
+                          search: { order: activeOrderNumber, method: "mpesa" },
+                        });
+                      }}
+                      className="btn-honey w-full"
+                    >
+                      Check order status
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentState("idle");
+                    }}
+                    className="text-xs font-medium text-muted-foreground hover:text-charcoal transition underline"
+                  >
+                    Change payment details / Try another number
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Summary */}
           <aside className="reveal h-fit rounded-3xl border border-border bg-card p-6 shadow-sm lg:sticky lg:top-28">

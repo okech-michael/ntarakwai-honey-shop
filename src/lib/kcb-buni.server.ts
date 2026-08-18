@@ -132,13 +132,20 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
 
     const bodyText = await response.text();
     if (!response.ok) {
+      console.error(`[KCB_BUNI][STK_ERROR] HTTP ${response.status}:`, bodyText);
+      let customerMsg = "We couldn't connect to the M-PESA payment service. Please try again shortly.";
+      if (bodyText.includes("Invalid PhoneNumber") || bodyText.includes("Invalid MSISDN")) {
+        customerMsg = "Please check your M-PESA phone number and try again.";
+      } else if (bodyText.includes("SUSPENDED") || response.status >= 500) {
+        customerMsg = "M-PESA payment is temporarily unavailable. Please try again shortly.";
+      }
       return {
         ok: false,
-        message: `KCB Buni STK Push rejected (${response.status}): ${bodyText}`,
+        message: customerMsg,
       };
     }
 
-    const data = JSON.parse(bodyText) as {
+    interface BuniStkResponseData {
       header?: { statusCode?: string; statusDescription?: string };
       response?: {
         CheckoutRequestID?: string;
@@ -149,12 +156,15 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
       CheckoutRequestID?: string;
       MerchantRequestID?: string;
       ResponseDescription?: string;
-    };
+      CustomerMessage?: string;
+    }
 
-    const resObj = data.response ?? data;
-    const checkoutRequestID = resObj.CheckoutRequestID ?? data.CheckoutRequestID;
-    const merchantRequestID = resObj.MerchantRequestID ?? data.MerchantRequestID;
-    const message = resObj.CustomerMessage ?? resObj.ResponseDescription ?? data.header?.statusDescription ?? "KCB Buni M-PESA STK Push sent successfully.";
+    const data = JSON.parse(bodyText) as BuniStkResponseData;
+    const checkoutRequestID = data.response?.CheckoutRequestID ?? data.CheckoutRequestID;
+    const merchantRequestID = data.response?.MerchantRequestID ?? data.MerchantRequestID;
+    const message = data.response?.CustomerMessage ?? data.response?.ResponseDescription ?? data.CustomerMessage ?? data.ResponseDescription ?? data.header?.statusDescription ?? "KCB Buni M-PESA STK Push sent successfully.";
+
+    console.log(`[KCB_BUNI][STK_ACCEPTED] order=${orderNumber} checkoutId=${checkoutRequestID}`);
 
     return {
       ok: true,
@@ -163,10 +173,10 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
       message,
     };
   } catch (error) {
-    console.error("KCB Buni STK Push error:", error);
+    console.error("[KCB_BUNI][STK_EXCEPTION]:", error);
     return {
       ok: false,
-      message: error instanceof Error ? error.message : "Failed to initiate KCB Buni M-PESA STK Push.",
+      message: "We couldn't connect to the payment service. Please check your network and try again.",
     };
   }
 }

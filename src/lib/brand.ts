@@ -42,6 +42,8 @@ export const TEAM = [
     bio: "Ledany's passion for beekeeping began at fifteen, on the slopes he grew up on. He founded Ntarakwai to give Mt. Kulal's honey gatherers a market worthy of their harvest, and leads the company's strategic direction, partnerships and community engagement.",
     duties: ["Overall leadership and strategy", "Partnerships and company management", "Community engagement", "Beekeeping initiatives"],
     initials: "LT",
+    phone: "0711 856 795",
+    phoneHref: "tel:+254711856795",
   },
   {
     name: "Leorian Ledany",

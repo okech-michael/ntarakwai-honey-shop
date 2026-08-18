@@ -1,7 +1,7 @@
 {
   "products": {
     "raw-500": {
-      "stock": 39,
+      "stock": 38,
       "reviews": [
         {
           "id": "review-1782397649362",
@@ -46,7 +46,7 @@
       "reviews": []
     },
     "ntara-honey": {
-      "stock": 13,
+      "stock": 12,
       "reviews": []
     }
   },
@@ -214,6 +214,59 @@
       "checkoutRequestID": "ws_CO_180820261133351722000000",
       "merchantRequestID": "8838-48ab-bdad-1f4dc54697c8111393",
       "paidAt": "2026-08-18T08:33:57.739Z"
+    },
+    {
+      "id": "HF42137800",
+      "items": [
+        {
+          "productId": "ntara-honey",
+          "qty": 1,
+          "unitPrice": 950,
+          "lineTotal": 950
+        }
+      ],
+      "customer": {
+        "fullName": "Erick Mwangi",
+        "phone": "0113242983",
+        "email": "rickmwasswiz@gmail.com",
+        "county": "Nairobi",
+        "town": "Nakuru",
+        "landmark": "aqwertghjk",
+        "address": "Nakuru-Nairobi Highway"
+      },
+      "paymentMethod": "mpesa",
+      "amount": 1200,
+      "paymentStatus": "initiated",
+      "createdAt": "2026-08-18T08:35:37.802Z",
+      "checkoutRequestID": "ws_CO_180820261135409113242983",
+      "merchantRequestID": "c19c-4844-8aa1-715deaf4e0ed15471"
+    },
+    {
+      "id": "HF43787370",
+      "items": [
+        {
+          "productId": "raw-500",
+          "qty": 1,
+          "unitPrice": 850,
+          "lineTotal": 850
+        }
+      ],
+      "customer": {
+        "fullName": "Jane Doe",
+        "phone": "0712345678",
+        "email": "jane@example.com",
+        "county": "Nairobi",
+        "town": "Westlands",
+        "landmark": "Sarit",
+        "address": "Parklands Road"
+      },
+      "paymentMethod": "mpesa",
+      "amount": 1100,
+      "paymentStatus": "paid",
+      "createdAt": "2026-08-18T09:03:07.371Z",
+      "checkoutRequestID": "ws_CO_180820261203114712345678",
+      "merchantRequestID": "3572-4b90-add9-3dbe7857c1b534094",
+      "paidAt": "2026-08-18T09:03:22.216Z"
     }
   ]
 }
