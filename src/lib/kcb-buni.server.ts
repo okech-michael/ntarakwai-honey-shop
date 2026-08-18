@@ -104,28 +104,29 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
   }
 
   try {
-    const timestamp = new Date().toISOString().replace(/[-:T.]/g, "").slice(0, 14);
-    const password = Buffer.from(`${shortCode}${passKey}${timestamp}`).toString("base64");
-
     const stkPushEndpoint = process.env.KCB_BUNI_STK_ENDPOINT || `${baseUrl}/mm/api/request/1.0.0/stkpush`;
+    const messageId = `NTK_KCB_${Date.now()}`;
+    const isShared = process.env.KCB_BUNI_SHARED_SHORTCODE !== "false";
+
     const response = await fetch(stkPushEndpoint, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        accept: "application/json",
+        routeCode: process.env.KCB_BUNI_ROUTE_CODE || "207",
+        operation: process.env.KCB_BUNI_OPERATION || "STKPush",
+        messageId,
       },
       body: JSON.stringify({
-        BusinessShortCode: shortCode,
-        Password: password,
-        Timestamp: timestamp,
-        TransactionType: "CustomerPayBillOnline",
-        Amount: Math.round(amount),
-        PartyA: formattedPhone,
-        PartyB: shortCode,
-        PhoneNumber: formattedPhone,
-        CallBackURL: callbackUrl,
-        AccountReference: orderNumber,
-        TransactionDesc: description || `Ntarakwai Honey Order ${orderNumber}`,
+        phoneNumber: formattedPhone,
+        amount: String(Math.round(amount)),
+        invoiceNumber: orderNumber,
+        sharedShortCode: isShared,
+        orgShortCode: isShared ? "" : (process.env.KCB_BUNI_ORG_SHORTCODE || shortCode),
+        orgPassKey: isShared ? "" : (process.env.KCB_BUNI_ORG_PASSKEY || passKey || ""),
+        callbackUrl: callbackUrl,
+        transactionDescription: description || `Ntarakwai Honey Order ${orderNumber}`,
       }),
     });
 
@@ -137,12 +138,29 @@ export async function initiateKcbMpesaPush({ amount, phone, orderNumber, descrip
       };
     }
 
-    const data = JSON.parse(bodyText) as { CheckoutRequestID?: string; MerchantRequestID?: string; ResponseDescription?: string };
+    const data = JSON.parse(bodyText) as {
+      header?: { statusCode?: string; statusDescription?: string };
+      response?: {
+        CheckoutRequestID?: string;
+        MerchantRequestID?: string;
+        ResponseDescription?: string;
+        CustomerMessage?: string;
+      };
+      CheckoutRequestID?: string;
+      MerchantRequestID?: string;
+      ResponseDescription?: string;
+    };
+
+    const resObj = data.response ?? data;
+    const checkoutRequestID = resObj.CheckoutRequestID ?? data.CheckoutRequestID;
+    const merchantRequestID = resObj.MerchantRequestID ?? data.MerchantRequestID;
+    const message = resObj.CustomerMessage ?? resObj.ResponseDescription ?? data.header?.statusDescription ?? "KCB Buni M-PESA STK Push sent successfully.";
+
     return {
       ok: true,
-      checkoutRequestID: data.CheckoutRequestID,
-      merchantRequestID: data.MerchantRequestID,
-      message: data.ResponseDescription || "KCB Buni M-PESA STK Push sent successfully.",
+      checkoutRequestID,
+      merchantRequestID,
+      message,
     };
   } catch (error) {
     console.error("KCB Buni STK Push error:", error);

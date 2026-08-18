@@ -46,7 +46,7 @@
       "reviews": []
     },
     "ntara-honey": {
-      "stock": 14,
+      "stock": 13,
       "reviews": []
     }
   },
@@ -187,6 +187,33 @@
       "createdAt": "2026-08-15T13:29:56.402Z",
       "checkoutRequestID": "KCB-1786800596794-284",
       "merchantRequestID": "KCB-MCH-1786800596798"
+    },
+    {
+      "id": "HF42011666",
+      "items": [
+        {
+          "productId": "ntara-honey",
+          "qty": 1,
+          "unitPrice": 950,
+          "lineTotal": 950
+        }
+      ],
+      "customer": {
+        "fullName": "Test Customer",
+        "phone": "254722000000",
+        "email": "test@example.com",
+        "county": "Nairobi",
+        "town": "Westlands",
+        "landmark": "Mall",
+        "address": "123 Test St"
+      },
+      "paymentMethod": "mpesa",
+      "amount": 1200,
+      "paymentStatus": "paid",
+      "createdAt": "2026-08-18T08:33:31.667Z",
+      "checkoutRequestID": "ws_CO_180820261133351722000000",
+      "merchantRequestID": "8838-48ab-bdad-1f4dc54697c8111393",
+      "paidAt": "2026-08-18T08:33:57.739Z"
     }
   ]
 }
