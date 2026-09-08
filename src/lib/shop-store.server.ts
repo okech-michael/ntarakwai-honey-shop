@@ -479,3 +479,45 @@ export async function handleShopApiRequest(pathname: string, request: Request): 
 
   return null;
 }
+
+export interface AdminStoreData {
+  orders: CheckoutOrder[];
+  stock: Record<string, number>;
+  reviews: Array<ShopReview & { productId: string }>;
+}
+
+export async function getAdminStoreData(): Promise<AdminStoreData> {
+  const state = await readState();
+  const stock: Record<string, number> = {};
+  const reviews: Array<ShopReview & { productId: string }> = [];
+  for (const product of SHOP_PRODUCTS) {
+    const entry = state.products[product.id];
+    stock[product.id] = entry?.stock ?? product.stock;
+    for (const review of entry?.reviews ?? []) reviews.push({ ...review, productId: product.id });
+  }
+  return { orders: [...state.orders], stock, reviews };
+}
+
+export async function adminUpdateOrderStatus(
+  orderId: string,
+  status: CheckoutOrder["paymentStatus"],
+): Promise<CheckoutOrder | undefined> {
+  const state = await readState();
+  const order = state.orders.find((entry) => entry.id === orderId);
+  if (!order) return undefined;
+  order.paymentStatus = status;
+  if (status === "paid" && !order.paidAt) order.paidAt = new Date().toISOString();
+  await writeState(state);
+  return order;
+}
+
+export async function adminUpdateStock(productId: string, stock: number): Promise<boolean> {
+  const product = SHOP_PRODUCTS.find((entry) => entry.id === productId);
+  if (!product) return false;
+  const state = await readState();
+  const entry = state.products[productId] ?? { stock: product.stock, reviews: [] };
+  entry.stock = Math.max(0, Math.round(stock));
+  state.products[productId] = entry;
+  await writeState(state);
+  return true;
+}
