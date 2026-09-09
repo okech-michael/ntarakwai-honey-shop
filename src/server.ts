@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { handleShopApiRequest } from "./lib/shop-store.server";
+import { handleAdminApiRequest } from "./lib/admin.server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -42,6 +43,13 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+      if (url.pathname.startsWith("/api/admin/")) {
+        const adminResponse = await handleAdminApiRequest(url.pathname, request);
+        if (adminResponse) {
+          return adminResponse;
+        }
+      }
+
       if (url.pathname.startsWith("/api/")) {
         const apiResponse = await handleShopApiRequest(url.pathname, request);
         if (apiResponse) {
