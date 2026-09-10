@@ -147,18 +147,18 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isCheckoutRoute = pathname.startsWith("/shop/checkout");
+  const isBareRoute = pathname.startsWith("/shop/checkout") || pathname.startsWith("/admin");
 
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <div className="min-h-screen bg-background text-foreground">
-          {!isCheckoutRoute && <Header />}
+          {!isBareRoute && <Header />}
           <main>
             <Outlet />
           </main>
-          {!isCheckoutRoute && <Footer />}
-          {!isCheckoutRoute && <MobileCallButton />}
+          {!isBareRoute && <Footer />}
+          {!isBareRoute && <MobileCallButton />}
         </div>
       </CartProvider>
     </QueryClientProvider>
